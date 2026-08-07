@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#3a0d5c" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Panel de Jugadas" />
+<meta name="format-detection" content="telephone=no" />
+<title>Panel de Jugadas · Loterías RD</title>
+
+<!-- Firebase (compat SDK, misma versión usada en tu service worker) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<link rel="stylesheet" href="css/styles.css?v=202608052020" />
+</head>
+<body>
+
+<!-- ======================= LOGIN ======================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo"><span class="material-symbols-rounded" style="font-size:30px;">confirmation_number</span></div>
+    <p class="login-title" id="loginTitulo">Panel de Jugadas</p>
+    <p class="login-sub" id="loginSub">Ingresa tu usuario y clave para continuar</p>
+
+    <div class="login-error" id="loginError"></div>
+
+    <!-- Formulario de LOGIN normal -->
+    <form id="formLogin">
+      <div class="field">
+        <label>Usuario</label>
+        <input id="loginUsuario" autocomplete="username" placeholder="ej. jperez" required />
+      </div>
+      <div class="field">
+        <label>Clave</label>
+        <input id="loginClave" type="password" autocomplete="current-password" placeholder="••••••••" required />
+      </div>
+      <button class="btn btn-primary" type="submit" id="btnLogin">Entrar</button>
+    </form>
+
+    <!-- Formulario de REGISTRO del primer admin (oculto por defecto) -->
+    <form id="formRegistroAdmin" style="display:none;">
+      <div class="field">
+        <label>Nombre completo</label>
+        <input id="regNombre" placeholder="Tu nombre" required />
+      </div>
+      <div class="field">
+        <label>Usuario</label>
+        <input id="regUsuario" placeholder="Elige un usuario" required />
+      </div>
+      <div class="field">
+        <label>Clave</label>
+        <input id="regClave" type="password" placeholder="Mínimo 4 caracteres" required minlength="4" />
+      </div>
+      <button class="btn btn-primary" type="submit">Crear cuenta de administrador</button>
+    </form>
+
+    <div class="login-toggle" id="loginToggleWrap">
+      <span id="loginToggleTxt">¿Eres el primer administrador?</span>
+      <a id="loginToggleLink">Crear cuenta admin</a>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= APP ======================= -->
+<div id="appScreen">
+  <div class="shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="brand">
+        <div class="logo"><span class="material-symbols-rounded" style="font-size:19px;">confirmation_number</span></div>
+        <div>
+          <b>Loterías RD</b>
+          <span id="brandRol">Panel</span>
+        </div>
+      </div>
+
+      <div id="navAdmin" style="display:none;">
+        <div class="navsection">Administración</div>
+        <div class="navitem" data-view="v-resumen"><span class="material-symbols-rounded navicon">dashboard</span>Resumen</div>
+        <div class="navitem" data-view="v-vendedores"><span class="material-symbols-rounded navicon">groups</span>Jugadores</div>
+        <div class="navitem" data-view="v-jugadas-admin"><span class="material-symbols-rounded navicon">confirmation_number</span>Jugadas <span class="badge" id="badgeJugadasAdmin" style="display:none;"></span></div>
+        <div class="navitem" data-view="v-resultado-jugadas"><span class="material-symbols-rounded navicon">fact_check</span>Resultado de jugadas</div>
+        <div class="navitem" data-view="v-cobros-admin"><span class="material-symbols-rounded navicon">payments</span>Cobros <span class="badge" id="badgeCobrosAdmin" style="display:none;"></span></div>
+        <div class="navitem" data-view="v-depositos-admin"><span class="material-symbols-rounded navicon">account_balance_wallet</span>Depósitos <span class="badge" id="badgeDepositosAdmin" style="display:none;"></span></div>
+        <div class="navitem" data-view="v-roi"><span class="material-symbols-rounded navicon">trending_up</span>ROI</div>
+        <div class="navitem" data-view="v-saldo"><span class="material-symbols-rounded navicon">account_balance</span>Saldo</div>
+        <div class="navitem" data-view="v-nomina"><span class="material-symbols-rounded navicon">badge</span>Nómina</div>
+        <div class="navitem" data-view="v-numeros"><span class="material-symbols-rounded navicon">pin</span>Números</div>
+        <div class="navitem" data-view="v-configuracion"><span class="material-symbols-rounded navicon">tune</span>Configuración</div>
+        <div class="navitem" data-view="v-simulacion"><span class="material-symbols-rounded navicon">auto_graph</span>Simulación</div>
+        <div class="navsection">Comunicación</div>
+        <div class="navitem" data-view="v-chat"><span class="material-symbols-rounded navicon">forum</span>Chat <span class="badge" id="badgeChatAdmin" style="display:none;"></span></div>
+      </div>
+
+      <div id="navVendedor" style="display:none;">
+        <div class="navsection">Mi cuenta</div>
+        <div class="navitem" data-view="v-caja"><span class="material-symbols-rounded navicon">point_of_sale</span>Caja del día</div>
+        <div class="navitem" data-view="v-jugadas-vendedor"><span class="material-symbols-rounded navicon">confirmation_number</span>Mis jugadas <span class="badge" id="badgeJugadasVendedor" style="display:none;"></span></div>
+        <div class="navitem" data-view="v-resultado-jugadas"><span class="material-symbols-rounded navicon">fact_check</span>Resultado de jugadas</div>
+        <div class="navitem" data-view="v-cobros-vendedor"><span class="material-symbols-rounded navicon">payments</span>Mis cobros <span class="badge" id="badgeCobrosVendedor" style="display:none;"></span></div>
+        <div class="navitem" data-view="v-depositar"><span class="material-symbols-rounded navicon">account_balance_wallet</span>Depositar</div>
+        <div class="navitem" data-view="v-numeros"><span class="material-symbols-rounded navicon">pin</span>Números</div>
+        <div class="navsection">Comunicación</div>
+        <div class="navitem" data-view="v-chat"><span class="material-symbols-rounded navicon">forum</span>Chat <span class="badge" id="badgeChatVendedor" style="display:none;"></span></div>
+        <div class="navsection">Ayuda</div>
+        <div class="navitem" data-view="v-informacion"><span class="material-symbols-rounded navicon">info</span>Información</div>
+        <div class="navitem" data-view="v-reglas"><span class="material-symbols-rounded navicon">gavel</span>Reglas</div>
+      </div>
+
+      <div class="sidebar-foot">
+        <button class="btn btn-outline" style="width:100%; background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.2);" id="btnLogout">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- ======================= BOTTOM NAVIGATION (Android, <=900px) ======================= -->
+    <div class="bottom-nav" id="bottomNav">
+      <div class="bottom-nav-items" id="bottomNavAdmin" style="display:none;">
+        <button class="bottom-nav-item" data-view="v-resumen"><span class="navicon material-symbols-rounded">dashboard</span>Resumen</button>
+        <button class="bottom-nav-item" data-view="v-jugadas-admin"><span class="navicon material-symbols-rounded">confirmation_number</span>Jugadas<span class="badge-dot" id="dotJugadasAdmin"></span></button>
+        <button class="bottom-nav-item" data-view="v-cobros-admin"><span class="navicon material-symbols-rounded">payments</span>Cobros<span class="badge-dot" id="dotCobrosAdmin"></span></button>
+        <button class="bottom-nav-item" data-view="v-depositos-admin"><span class="navicon material-symbols-rounded">account_balance_wallet</span>Depósitos<span class="badge-dot" id="dotDepositosAdmin"></span></button>
+        <button class="bottom-nav-item" data-view="v-chat"><span class="navicon material-symbols-rounded">forum</span>Chat<span class="badge-dot" id="dotChatAdmin"></span></button>
+        <button class="bottom-nav-item" id="btnBottomNavMasAdmin"><span class="navicon material-symbols-rounded">menu</span>Más</button>
+      </div>
+      <div class="bottom-nav-items" id="bottomNavVendedor" style="display:none;">
+        <button class="bottom-nav-item" data-view="v-caja"><span class="navicon material-symbols-rounded">point_of_sale</span>Caja</button>
+        <button class="bottom-nav-item" data-view="v-jugadas-vendedor"><span class="navicon material-symbols-rounded">confirmation_number</span>Jugadas<span class="badge-dot" id="dotJugadasVendedor"></span></button>
+        <button class="bottom-nav-item" data-view="v-cobros-vendedor"><span class="navicon material-symbols-rounded">payments</span>Cobros<span class="badge-dot" id="dotCobrosVendedor"></span></button>
+        <button class="bottom-nav-item" data-view="v-depositar"><span class="navicon material-symbols-rounded">account_balance_wallet</span>Depositar</button>
+        <button class="bottom-nav-item" data-view="v-chat"><span class="navicon material-symbols-rounded">forum</span>Chat<span class="badge-dot" id="dotChatVendedor"></span></button>
+        <button class="bottom-nav-item" id="btnBottomNavMasVendedor"><span class="navicon material-symbols-rounded">menu</span>Más</button>
+      </div>
+    </div>
+
+    <!-- ======================= FAB (acción principal de la vista actual) ======================= -->
+    <button class="fab" id="fabAccion" aria-label="Acción principal">
+      <span class="material-symbols-rounded">add</span>
+    </button>
+
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex; align-items:center; gap:6px; min-width:0;">
+          <button class="hamburger" id="btnMenuToggle" aria-label="Abrir menú">☰</button>
+          <h1 id="topbarTitle">Resumen</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="caja-pill cerrada" id="cajaPillTop" style="display:none;">Caja cerrada hoy</div>
+          <div class="saldo-pill" id="saldoPillTop" style="display:none;"> RD$0</div>
+          <div class="user-chip">
+            <div class="av" id="userAvatar">?</div>
+            <div>
+              <div id="userNombre" style="font-weight:600;color:var(--text);">—</div>
+              <div id="userRolTxt" style="font-size:11.5px;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ---------------- ADMIN: RESUMEN ---------------- -->
+        <div class="view" id="v-resumen">
+          <div class="grid grid-4" style="margin-bottom:22px;">
+            <div class="stat-card"><div class="lbl">Jugadores activos</div><div class="val" id="rsVendedores">0</div></div>
+            <div class="stat-card"><div class="lbl">Jugadas pendientes</div><div class="val accent" id="rsJugadasPend">0</div></div>
+            <div class="stat-card"><div class="lbl">Cobros pendientes</div><div class="val accent" id="rsCobrosPend">0</div></div>
+            <div class="stat-card"><div class="lbl">Depósitos por confirmar</div><div class="val accent" id="rsDepPend">0</div></div>
+            <div class="stat-card"><div class="lbl"> Saldo inicial</div><div class="val" id="rsSaldoInicial">RD$0</div></div>
+            <div class="stat-card"><div class="lbl"> Saldo invertido</div><div class="val" id="rsSaldoInvertido">RD$0</div></div>
+            <div class="stat-card"><div class="lbl"> Saldo actual</div><div class="val" id="rsSaldoActual">RD$0</div></div>
+            <div class="stat-card"><div class="lbl">Saldo total jugadores</div><div class="val success" id="rsSaldoTotal">RD$0</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Saldo por jugador</h3></div>
+            <div class="card-body" style="padding:0;">
+              <table>
+                <thead><tr><th>Jugador</th><th>Saldo actual</th><th>Caja hoy</th><th>Estado</th></tr></thead>
+                <tbody id="rsTablaVendedores"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- ADMIN: JUGADORES ---------------- -->
+        <div class="view" id="v-vendedores">
+          <div class="toolbar" style="justify-content:flex-end;">
+            <button class="btn btn-primary btn-sm" id="btnNuevoVendedor">+ Nuevo jugador</button>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Usuario</th><th>Nombre</th><th>Saldo</th><th>Caja hoy</th><th>Estado</th><th></th></tr></thead>
+                  <tbody id="tablaVendedoresAdmin"></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsVendedoresAdmin"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- ADMIN: JUGADAS ---------------- -->
+        <div class="view" id="v-jugadas-admin">
+          <div class="toolbar" style="justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <select id="filtroJugadasAdminSelect" class="filter-select" style="padding:9px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff; min-width:180px;">
+                <option value="">Selecciona una opción</option>
+                <option value="todas">Todas las jugadas</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="aceptada">Aceptadas</option>
+                <option value="confirmada">Confirmadas</option>
+                <option value="rechazada">Rechazadas</option>
+              </select>
+              <input type="date" id="filtroFechaJugadasAdmin" title="Filtrar por fecha del sorteo" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <button class="btn btn-outline btn-sm" id="btnLimpiarFechaJugadasAdmin" type="button">✕ Quitar fecha</button>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnNuevaJugada">+ Enviar jugada</button>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Ticket</th><th>Jugador</th><th>Lotería</th><th>Tipo</th><th>Números</th><th>Monto</th><th>Sorteo</th><th>Estado</th><th>Enviada</th></tr></thead>
+                  <tbody id="tablaJugadasAdmin"></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsJugadasAdmin"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- RESULTADO DE JUGADAS (admin y jugador) ---------------- -->
+        <div class="view" id="v-resultado-jugadas">
+          <p class="hint" style="margin-top:0;">Compara los números que jugaste contra el resultado oficial de la lotería. Primero elige la fecha y la lotería (solo se muestran las loterías cuyo sorteo ya pasó), luego revisa cada ticket.</p>
+
+          <div class="toolbar" style="flex-wrap:wrap; gap:10px; justify-content:flex-start;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label class="small-muted" style="font-weight:700;">Fecha</label>
+              <input type="date" id="rjFecha" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; min-width:220px;">
+              <label class="small-muted" style="font-weight:700;">Lotería (sorteo ya realizado)</label>
+              <select id="rjLoteria" class="filter-select" style="padding:9px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;">
+                <option value="">Selecciona una lotería</option>
+              </select>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btnRjHoy" type="button" style="align-self:flex-end;">Hoy</button>
+          </div>
+
+          <div id="rjSinLoterias" class="empty-state" style="display:none; margin-top:14px;">
+            <div class="ic"></div>
+            Ninguna lotería de esta fecha ha cerrado su sorteo todavía. Vuelve a intentarlo después de la hora del sorteo.
+          </div>
+
+          <div id="rjResumenLoteria" class="grid grid-3" style="margin:18px 0; display:none;">
+            <div class="stat-card"><div class="lbl">Tickets jugados</div><div class="val" id="rjTotalTickets">0</div></div>
+            <div class="stat-card"><div class="lbl">Con acierto</div><div class="val success" id="rjTotalGanadores">0</div></div>
+            <div class="stat-card"><div class="lbl">Sin acierto</div><div class="val danger" id="rjTotalPerdedores">0</div></div>
+          </div>
+
+          <div id="rjResultadoOficialBox" style="display:none; margin-bottom:18px;"></div>
+
+          <div id="rjListaTickets"></div>
+        </div>
+
+        <!-- ---------------- ADMIN: COBROS ---------------- -->
+        <div class="view" id="v-cobros-admin">
+          <div class="toolbar" style="justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <select id="filtroCobrosAdminSelect" class="filter-select" style="padding:9px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff; min-width:180px;">
+                <option value="">Selecciona una opción</option>
+                <option value="todas">Todas las solicitudes</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="aceptada">Aceptadas</option>
+                <option value="confirmada">Confirmadas</option>
+                <option value="rechazada">Rechazadas</option>
+              </select>
+              <input type="date" id="filtroFechaCobrosAdmin" title="Filtrar por fecha de la solicitud" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <button class="btn btn-outline btn-sm" id="btnLimpiarFechaCobrosAdmin" type="button">✕ Quitar fecha</button>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnNuevoCobro">+ Enviar solicitud de cobro</button>
+          </div>
+          <div id="listaCobrosAdmin"></div>
+        </div>
+
+        <!-- ---------------- ADMIN: DEPOSITOS ---------------- -->
+        <div class="view" id="v-depositos-admin">
+          <div class="card">
+            <div class="card-head">
+              <h3>Cuentas para recibir transferencias</h3>
+              <button class="btn btn-primary btn-sm" id="btnNuevaCuenta">+ Agregar cuenta</button>
+            </div>
+            <div class="card-body" id="listaCuentasAdmin">
+              <!-- se llena con renderCuentasAdmin() -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Total depositado</h3>
+            </div>
+            <div class="card-body">
+              <div class="toolbar" style="padding:0; margin-bottom:14px; flex-wrap:wrap;">
+                <label class="small-muted" style="margin:0;">Desde</label>
+                <input type="date" id="depTotalDesde" />
+                <label class="small-muted" style="margin:0;">Hasta</label>
+                <input type="date" id="depTotalHasta" />
+                <button class="btn btn-outline btn-sm" id="btnDepTotalHoy" type="button">Hoy</button>
+                <button class="btn btn-outline btn-sm" id="btnDepTotalLimpiar" type="button">Quitar rango</button>
+              </div>
+              <div class="stat-card">
+                <div class="lbl"> Depósitos confirmados en el rango</div>
+                <div class="val success" id="depTotalConfirmadoVal">RD$0</div>
+                <div class="small-muted" id="depTotalConfirmadoCant" style="margin-top:4px;">0 depósitos</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Depósitos reportados por jugadores</h3>
+              <button class="btn btn-primary btn-sm" id="btnSolicitarDeposito">+ Solicitar depósito</button>
+            </div>
+            <div class="toolbar" style="justify-content:space-between; padding:0 20px; margin-top:16px;">
+              <div class="filter-tabs" id="filtroVendedorDepositosAdmin">
+                <div class="filter-tab active" data-v="todos">Todos los jugadores</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="date" id="filtroFechaDepositosAdmin" title="Filtrar por fecha del reporte" />
+                <button class="btn btn-outline btn-sm" id="btnLimpiarFechaDepositosAdmin" type="button">Quitar fecha</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Jugador</th><th>Monto</th><th>Método</th><th>Estado</th><th>Reportado</th><th></th></tr></thead>
+                  <tbody id="tablaDepositosAdmin"></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsDepositosAdmin"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- ADMIN: ROI ---------------- -->
+        <div class="view" id="v-roi">
+          <div class="toolbar" style="margin-bottom:18px; flex-wrap:wrap; gap:10px; justify-content:flex-start;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <label class="small-muted" style="font-weight:700;">Desde</label>
+              <input type="date" id="roiFechaDesde" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <label class="small-muted" style="font-weight:700;">Hasta</label>
+              <input type="date" id="roiFechaHasta" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <button class="btn btn-outline btn-sm" id="btnRoiHoy" type="button">Hoy</button>
+            </div>
+          </div>
+
+          <div class="grid grid-4" style="margin-bottom:18px;">
+            <div class="stat-card"><div class="lbl"> Período</div><div class="val" id="roiPeriodoVal">—</div></div>
+            <div class="stat-card"><div class="lbl"> Ganado en aciertos</div><div class="val success" id="roiGanado">RD$0</div></div>
+            <div class="stat-card"><div class="lbl"> Invertido en jugadas ganadoras</div><div class="val" id="roiInvertidoGanadoras">RD$0</div></div>
+            <div class="stat-card"><div class="lbl"> Pérdidas (sin acierto)</div><div class="val danger" id="roiPerdidas">RD$0</div></div>
+          </div>
+
+          <div class="grid grid-2" style="margin-bottom:18px;">
+            <div class="stat-card"><div class="lbl"> Ganancia neta (rachas de martingala recuperadas)</div><div class="val" id="roiGananciaNetaValor">RD$0</div></div>
+            <div class="stat-card"><div class="lbl"> Rachas recuperadas en el período</div><div class="val" id="roiGananciaNetaCantidad">0</div></div>
+          </div>
+
+          <div class="card roi-card-final" id="roiCardFinal">
+            <div class="card-body" style="text-align:center; padding:32px 20px;">
+              <div class="lbl" style="font-size:12.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">ROI del período</div>
+              <div id="roiValorFinal" class="roi-valor">RD$0</div>
+              <div class="small-muted" id="roiResumenTexto" style="margin-top:10px;">Selecciona un rango de fechas.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Detalle por jugada</h3>
+              <span class="small-muted" id="roiCantidadJugadas">0 jugadas resueltas</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table>
+                <thead><tr><th>Ticket</th><th>Jugador</th><th>Lotería</th><th>Tipo</th><th>Sorteo</th><th>Invertido</th><th>Ganado</th><th>Resultado</th></tr></thead>
+                <tbody id="roiTablaDetalle"><tr class="empty-row"><td colspan="8">Elige un rango de fechas.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="small-muted" style="margin-top:10px;">Solo se cuentan las jugadas <b>confirmadas</b> cuyo sorteo ya tiene resultado oficial publicado. Las que aún están en espera del sorteo no afectan el ROI todavía.</p>
+        </div>
+
+        <!-- ---------------- ADMIN: SALDO ---------------- -->
+        <div class="view" id="v-saldo">
+          <div class="toolbar" style="justify-content:flex-end; margin-bottom:18px;">
+            <button class="btn btn-outline btn-sm" id="btnEditarSaldoInicial">Editar saldo inicial</button>
+          </div>
+
+          <div class="grid grid-3" style="margin-bottom:18px;">
+            <div class="stat-card">
+              <div class="lbl"> Saldo inicial</div>
+              <div class="val" id="saldoInicialVal">RD$0</div>
+              <div class="small-muted" style="margin-top:4px;">Capital base definido por el admin</div>
+            </div>
+            <div class="stat-card">
+              <div class="lbl"> Saldo invertido</div>
+              <div class="val" id="saldoInvertidoVal">RD$0</div>
+              <div class="small-muted" style="margin-top:4px;">Saldo inicial + recargas asignadas a todos los jugadores</div>
+            </div>
+            <div class="stat-card">
+              <div class="lbl"> Saldo actual</div>
+              <div class="val" id="saldoActualVal">RD$0</div>
+              <div class="small-muted" style="margin-top:4px;">Inicial − asignado a jugadores − nómina + ganancia neta</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Saldo por jugador</h3>
+              <span class="small-muted" id="saldoCantidadVendedores">0 jugadores activos</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Jugador</th><th>Saldo inicial asignado</th><th>Saldo actual</th><th>Variación</th></tr></thead>
+                  <tbody id="tablaSaldoVendedores"><tr class="empty-row"><td colspan="4">Cargando...</td></tr></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsSaldoVendedores"></div>
+            </div>
+          </div>
+
+          <p class="small-muted" style="margin-top:10px;">El saldo actual de la banca es el saldo inicial: <b>menos</b> las recargas asignadas a los jugadores, <b>menos</b> los pagos de nómina ya realizados, <b>más</b> los cobros confirmados, <b>más</b> los depósitos confirmados. Es decir: el dinero que sale de la banca (recargas, nómina) la baja, y el dinero que entra a la banca (cobros y depósitos confirmados) la sube.</p>
+        </div>
+
+        <!-- ---------------- ADMIN: NÓMINA ---------------- -->
+        <div class="view" id="v-nomina">
+          <p class="hint" style="margin-top:0;">Cada jugador tiene un pago quincenal fijo (edítalo desde "Jugadores"). Si un jugador no confirma una solicitud de cobro o su saldo no coincide con el flujo actual, aplícale un descuento aquí: se restará de su próximo pago. Al pagar la nómina, el neto se descuenta automáticamente del saldo actual de la banca.</p>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Nómina por jugador</h3>
+              <span class="small-muted" id="nominaCantidadVendedores">0 jugadores activos</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Jugador</th><th>Pago quincenal</th><th>Descuentos pendientes</th><th>Neto a pagar</th><th></th></tr></thead>
+                  <tbody id="tablaNomina"><tr class="empty-row"><td colspan="5">Cargando...</td></tr></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsNomina"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Historial de nómina</h3>
+              <span class="small-muted" id="nominaHistCantidad">0 movimientos</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap-desktop">
+                <table>
+                  <thead><tr><th>Jugador</th><th>Tipo</th><th>Monto</th><th>Motivo</th><th>Fecha</th></tr></thead>
+                  <tbody id="tablaNominaHist"><tr class="empty-row"><td colspan="5">Sin movimientos todavía.</td></tr></tbody>
+                </table>
+              </div>
+              <div class="cards-wrap-mobile" id="cardsNominaHist"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: CAJA ---------------- -->
+        <div class="view" id="v-caja">
+          <div class="card" style="max-width:520px;">
+            <div class="card-body" style="text-align:center; padding:36px 24px;">
+              <div style="font-size:44px; margin-bottom:10px;" id="cajaIcono"></div>
+              <h3 id="cajaEstadoTxt" style="margin:0 0 6px;">Caja cerrada</h3>
+              <p class="small-muted" id="cajaFechaTxt">—</p>
+              <p class="hint" style="margin:14px 0 20px;" id="cajaHint">Debes abrir la caja cada día antes de poder aceptar o confirmar jugadas y cobros.</p>
+              <button class="btn btn-primary" id="btnAbrirCaja" style="width:auto; padding:12px 28px;">Abrir caja de hoy</button>
+              <button class="btn btn-outline" id="btnCerrarCaja" style="width:auto; padding:12px 28px; display:none; border-color:var(--danger); color:var(--danger);">Cerrar caja de hoy</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <div class="card-head">
+              <h3>Historial de caja</h3>
+              <span class="small-muted" id="cajaHistCantidad">0 días</span>
+            </div>
+            <div class="card-body" style="padding-top:0;">
+              <div class="toolbar" style="margin-bottom:14px; flex-wrap:wrap; gap:10px; justify-content:flex-start;">
+                <label class="small-muted" style="font-weight:700;">Desde</label>
+                <input type="date" id="cajaHistDesde" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+                <label class="small-muted" style="font-weight:700;">Hasta</label>
+                <input type="date" id="cajaHistHasta" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+                <button class="btn btn-outline btn-sm" id="btnCajaHistFiltrar" type="button">Filtrar</button>
+              </div>
+              <table>
+                <thead><tr><th>Fecha</th><th>Apertura</th><th>Monto apertura</th><th>Cierre</th><th>Monto cierre</th><th>Esperado</th><th>Diferencia</th><th>Estado</th></tr></thead>
+                <tbody id="cajaHistTabla"><tr class="empty-row"><td colspan="8">Cargando historial...</td></tr></tbody>
+              </table>
+              <p class="small-muted" style="margin-top:10px;">Por política de retención, la app guarda el historial de los últimos 18 días.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: INFORMACIÓN ---------------- -->
+        <div class="view" id="v-informacion">
+          <div class="card">
+            <div class="card-body" style="padding:26px 28px;">
+              <h3 style="margin-top:0;">¿Cómo funciona la app de loterías?</h3>
+              <p class="hint" style="margin-top:-4px;">Guía completa para jugadores: el flujo correcto de trabajo dentro de la banca.</p>
+
+              <h4 style="margin-bottom:6px;">1. La caja del día</h4>
+              <p class="small-muted">Cada día, antes de recibir o enviar cualquier jugada, debes <b>abrir tu caja</b> desde la sección "Caja del día", indicando con cuánto efectivo empiezas. Sin la caja abierta, la app no te permitirá aceptar jugadas ni enviar solicitudes de cobro. Al finalizar tu jornada, debes <b>cerrar la caja</b> contando tu efectivo real; la app calcula automáticamente cuánto debería haber (arqueo) con base en tus cobros, jugadas y depósitos confirmados en el día, y te muestra el detalle completo de cada movimiento para que quede todo transparente. Si el efectivo contado no coincide y <b>falta dinero</b>, el faltante se descuenta automáticamente de tu próximo pago de nómina. Todo queda guardado en tu historial para que tanto tú como el admin puedan revisarlo.</p>
+
+              <h4 style="margin-bottom:6px;">2. Cómo llegan las jugadas</h4>
+              <p class="small-muted">El admin registra y confirma las jugadas que debes realizar. Estas aparecen en "Mis jugadas" con toda la información: lotería, tipo de jugada, números, montos y horario del sorteo. Tu trabajo es <b>realizar la jugada exactamente como fue enviada</b>, jugando los números y montos indicados en la banca física correspondiente.</p>
+
+              <h4 style="margin-bottom:6px;">3. El ticket físico</h4>
+              <p class="small-muted">Cuando realizas una jugada en la banca, esta te entrega un <b>ticket físico</b>. Debes conservarlo en buen estado: es la prueba de la jugada y se usa para validar cualquier solicitud de cobro cuando un número resulta ganador.</p>
+
+              <h4 style="margin-bottom:6px;">4. Resultados y cobros</h4>
+              <p class="small-muted">Una vez la lotería publica los resultados oficiales, la app calcula automáticamente qué jugadas acertaron. Desde "Mis cobros" puedes ver el estado de tus solicitudes. El admin es quien revisa y aprueba cada pago antes de que se acredite.</p>
+
+              <h4 style="margin-bottom:6px;">5. Depósitos</h4>
+              <p class="small-muted">Cuando el admin solicite un depósito, puedes realizarlo en la oficina o por transferencia bancaria desde la sección "Depositar". Todo depósito, sin importar el medio, debe ser <b>confirmado por el admin</b> antes de reflejarse en tu saldo.</p>
+
+              <h4 style="margin-bottom:6px;">6. Consulta de números</h4>
+              <p class="small-muted">En la sección "Números" puedes consultar los resultados oficiales de cada lotería y sorteo para verificar aciertos antes de enviar una solicitud de cobro.</p>
+
+              <h4 style="margin-bottom:6px;">La forma correcta de jugar en la banca</h4>
+              <ul class="small-muted" style="padding-left:18px; margin:0;">
+                <li>Abre tu caja antes de empezar a trabajar.</li>
+                <li>Recibe la jugada del admin y verifica que tenga toda la información antes de realizarla.</li>
+                <li>Juega en la banca exactamente los números y montos indicados, sin modificar nada.</li>
+                <li>Guarda el ticket físico que te entrega la banca hasta que el premio, si aplica, sea cobrado.</li>
+                <li>Si no vas a poder realizar una jugada, no la aceptes: infórmalo a tiempo.</li>
+                <li>Cierra tu caja al final del día con el monto real disponible; si falta dinero, se descuenta de tu pago.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: REGLAS ---------------- -->
+        <div class="view" id="v-reglas">
+          <div class="card">
+            <div class="card-body" style="padding:26px 28px;">
+              <h3 style="margin-top:0;">Reglas de la banca</h3>
+              <p class="hint" style="margin-top:-4px;">El incumplimiento de estas reglas puede afectar tu cuenta y tu pago mensual. Léelas con atención.</p>
+              <ol class="small-muted" style="padding-left:20px; display:flex; flex-direction:column; gap:12px; margin:0;">
+                <li>Se debe <b>abrir la caja</b> antes de recibir cualquier jugada.</li>
+                <li>Las jugadas deben realizarse <b>tal cual las envía el admin</b>, sin cambiar números, montos ni loterías.</li>
+                <li>Está <b>prohibido compartir datos de la app</b> con personas externas a la banca.</li>
+                <li>Al realizar una jugada en la banca debes <b>conservar el ticket físico</b> para usarlo cuando se envíe una solicitud de cobro.</li>
+                <li>Si pierdes el ticket físico, el importe correspondiente será <b>deducido de tu pago mensual</b>.</li>
+                <li>Si no vas a realizar una jugada que te fue enviada, <b>no la aceptes</b>.</li>
+                <li>El saldo de la caja es <b>únicamente para realizar jugadas</b>; está prohibido usarlo en cualquier otro medio.</li>
+                <li>Al cerrar la caja, el efectivo contado debe <b>cuadrar con el arqueo automático</b> del sistema. Si falta dinero, el faltante se <b>descuenta automáticamente</b> de tu próximo pago de nómina, con el detalle completo de los movimientos del día como respaldo.</li>
+                <li>Los depósitos se deben realizar <b>solo cuando el admin lo solicite</b>, ya sea en la oficina o por transferencia, y ambos casos deben ser <b>confirmados por el admin</b>.</li>
+                <li>Cualquier situación no contemplada aquí será resuelta directamente con el admin de la banca.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: JUGADAS ---------------- -->
+        <div class="view" id="v-jugadas-vendedor">
+          <div class="toolbar" style="justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <select id="filtroJugadasVendedorSelect" class="filter-select" style="padding:9px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff; min-width:180px;">
+                <option value="">Selecciona una opción</option>
+                <option value="todas">Todas mis jugadas</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="aceptada">Por confirmar</option>
+                <option value="confirmada">Confirmadas</option>
+                <option value="rechazada">Rechazadas</option>
+              </select>
+              <input type="date" id="filtroFechaJugadasVendedor" title="Filtrar por fecha del sorteo" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <button class="btn btn-outline btn-sm" id="btnLimpiarFechaJugadasVendedor" type="button">✕ Quitar fecha</button>
+            </div>
+          </div>
+          <div id="listaJugadasVendedor"></div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: COBROS ---------------- -->
+        <div class="view" id="v-cobros-vendedor">
+          <div class="toolbar" style="justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <select id="filtroCobrosVendedorSelect" class="filter-select" style="padding:9px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff; min-width:180px;">
+                <option value="">Selecciona una opción</option>
+                <option value="todas">Todas mis solicitudes</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="aceptada">Por confirmar</option>
+                <option value="confirmada">Confirmadas</option>
+                <option value="rechazada">Rechazadas</option>
+              </select>
+              <input type="date" id="filtroFechaCobrosVendedor" title="Filtrar por fecha de la solicitud" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff;" />
+              <button class="btn btn-outline btn-sm" id="btnLimpiarFechaCobrosVendedor" type="button">✕ Quitar fecha</button>
+            </div>
+          </div>
+          <div id="listaCobrosVendedor"></div>
+        </div>
+
+        <!-- ---------------- VENDEDOR: DEPOSITAR ---------------- -->
+        <div class="view" id="v-depositar">
+          <div class="card" id="depositoSolicitudBanner" style="display:none; border:1.5px solid var(--primary); background:var(--primary-soft); margin-bottom:18px;">
+            <div class="card-body" style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:700; color:var(--primary-dark);">El admin te solicitó un depósito</div>
+                <div class="small-muted" id="depositoSolicitudTexto" style="margin-top:2px;"></div>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btnUsarSolicitudDeposito" type="button" style="width:auto; white-space:nowrap;">Reportar ahora</button>
+            </div>
+          </div>
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Reportar depósito</h3></div>
+              <div class="card-body">
+                <p class="hint" style="margin-top:0;">Al confirmarse por el administrador, este monto se restará de tu saldo.</p>
+                <div class="field">
+                  <label>Método de depósito</label>
+                  <div class="filter-tabs" id="depositoMetodoTabs">
+                    <div class="filter-tab active" data-metodo="efectivo"> Efectivo</div>
+                    <div class="filter-tab" data-metodo="transferencia"> Transferencia</div>
+                  </div>
+                </div>
+                <div class="field" id="depositoCuentaWrap" style="display:none;">
+                  <label>Cuenta a la que transferiste</label>
+                  <div id="depositoCuentaLista"></div>
+                  <p class="hint" id="depositoCuentaVacio" style="display:none;">El administrador aún no ha registrado cuentas para transferencias. Elige "Efectivo" o consulta directamente con él.</p>
+                </div>
+                <div class="field">
+                  <label>Monto depositado (RD$)</label>
+                  <input type="number" id="depositoMonto" min="1" placeholder="0.00" />
+                </div>
+                <div class="field">
+                  <label>Referencia / nota (opcional)</label>
+                  <input id="depositoNota" placeholder="ej. Número de confirmación, comprobante, etc." />
+                </div>
+                <button class="btn btn-primary" id="btnEnviarDeposito">Reportar depósito</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Historial de mis depósitos</h3></div>
+              <div class="card-body" style="padding:0;">
+                <table>
+                  <thead><tr><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th></tr></thead>
+                  <tbody id="tablaDepositosVendedor"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- COMPARTIDA: NUMEROS ---------------- -->
+        <div class="view" id="v-numeros">
+
+          <!-- Paso 1: elegir qué extraer -->
+          <div class="card" id="numPaso1">
+            <div class="card-head"><h3>¿Qué quieres extraer?</h3></div>
+            <div class="card-body">
+              <div class="grid grid-2" id="numPaso1Grid">
+                <div class="stat-card" style="cursor:pointer; text-align:center; padding:26px 18px;" id="btnTipoNumerologo">
+                  <div style="font-size:34px; margin-bottom:8px;"></div>
+                  <div style="font-weight:700; font-size:15px;">Numerólogo</div>
+                  <div class="small-muted" style="margin-top:4px;">Números sugeridos por el Numerólogo para jugar</div>
+                </div>
+                <div class="stat-card" style="cursor:pointer; text-align:center; padding:26px 18px;" id="btnTipoResultados">
+                  <div style="font-size:34px; margin-bottom:8px;"></div>
+                  <div style="font-weight:700; font-size:15px;">Resultados oficiales</div>
+                  <div class="small-muted" style="margin-top:4px;">Números que realmente salieron en el sorteo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paso 2: elegir lotería (aparece luego de elegir tipo) -->
+          <div class="card" id="numPaso2" style="display:none;">
+            <div class="card-head">
+              <h3 id="numPaso2Titulo"> Numerólogo</h3>
+              <button class="btn btn-outline btn-sm" id="btnCambiarTipoNum">← Cambiar</button>
+            </div>
+            <div class="card-body">
+              <div class="filter-tabs" id="filtroTipoLoteriaNum" style="margin-bottom:10px;"></div>
+              <div class="field" style="max-width:420px;">
+                <label>Lotería</label>
+                <select id="numLoteria"></select>
+              </div>
+
+              <!-- ---- Subvista: RESULTADOS OFICIALES (búsqueda por fecha, tal cual escalpeados) ---- -->
+              <div id="numResultadosSub" style="display:none;">
+                <div class="toolbar">
+                  <input type="date" id="numFecha" />
+                  <button class="btn btn-primary btn-sm" id="btnBuscarNumeros">Buscar</button>
+                </div>
+                <div id="numerosResultadoWrap" style="display:none;">
+                  <div class="avail-numbers" id="numerosContenedor"></div>
+                </div>
+                <div class="empty-state" id="numerosVacio">
+                  <div class="ic"></div>
+                  Elige una lotería y una fecha, luego toca "Buscar".
+                </div>
+              </div>
+
+              <!-- ---- Subvista: NUMERÓLOGO (generador de números en la app) ---- -->
+              <div id="numGeneradorSub" style="display:none;">
+
+                <div class="field" id="numTipoJugadaWrap">
+                  <label>Tipo de jugada</label>
+                  <div class="filter-tabs" id="numTipoJugadaChips"></div>
+                </div>
+
+                <div class="field" id="numLoteriaUnicaInfo" style="display:none;">
+                  <p class="hint" style="margin:0;">Esta lotería tiene un solo tipo de jugada.</p>
+                </div>
+
+                <div class="field" id="numCantidadWrap" style="max-width:260px;">
+                  <label id="numCantidadLabel">Cantidad de números</label>
+                  <input type="number" id="numCantidad" min="1" max="50" step="1" />
+                  <p class="hint" id="numCantidadHint" style="margin:6px 0 0;"></p>
+                </div>
+
+                <p class="small-muted" id="numConfigInfo" style="margin:0 0 4px;"></p>
+                <p class="hint" style="margin:0 0 14px;">
+                  Las estrategias, la tendencia alto/bajo y la exclusión de sorteos recientes se ajustan en
+                  <b>Configuración → Numerólogo (por tipo de jugada)</b>, y aplican igual aquí y en "Cargar tipos" de Enviar jugada.
+                </p>
+
+                <button class="btn btn-primary" id="btnNumerologoGenerar" style="margin-top:6px;">✨ Generar números</button>
+
+                <div id="numerologoResultadoWrap" style="display:none; margin-top:18px;">
+                  <div class="numerologo-card" id="numerologoResultadoCard"></div>
+                </div>
+                <div class="empty-state" id="numerologoVacio">
+                  <div class="ic"></div>
+                  Ajusta las opciones y toca "Generar números".
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------------- ADMIN: CONFIGURACIÓN ---------------- -->
+        <div class="view" id="v-configuracion">
+          <p class="hint" style="margin-top:0;">
+            Aquí ves si <b>main.py</b> (el que escalpea los resultados oficiales) está en línea, y configuras
+            TODOS los parámetros con los que la app genera números: tanto en <b>Números → Numerólogo</b> como en
+            <b>Enviar jugada</b> ("Cargar tipos", "Generar numerólogo (tendencia)" y "Numerologitos"). Cada
+            estrategia tiene su propia configuración, porque cada una funciona distinto. Los cambios se aplican
+            de inmediato, en tiempo real, sin tocar ningún código.
+          </p>
+
+          <!-- Estado del script (main.py) -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Estado del sistema (main.py)</h3>
+              <span class="script-status-pill unknown" id="cfgEstadoPill">● Verificando...</span>
+            </div>
+            <div class="card-body">
+              <p class="small-muted" id="cfgEstadoDetalle" style="margin:0;">Esperando noticias del script (main.py)...</p>
+            </div>
+          </div>
+
+          <!-- ============ 1) NUMERÓLOGO (por tipo de jugada) ============ -->
+          <div class="card">
+            <div class="card-head">
+              <h3> Numerólogo <span class="small-muted" style="font-weight:400;">(por tipo de jugada)</span></h3>
+            </div>
+            <div class="card-body">
+              <p class="hint" style="margin-top:0;">
+                Usado por <b>Números → Numerólogo</b> y por <b>Enviar jugada → Cargar tipos</b>. Genera un pool base
+                ("Ganar 85% seguro") y de ahí se derivan Tripleta (3), Palé (2) y Quiniela (1). Para KINO / LOTO REAL /
+                LOTO POOL / LOTOMAS solo aplican las estrategias (no tendencia ni exclusión, que son propias de las quinielas).
+              </p>
+
+              <div class="field">
+                <label>Estrategias disponibles <span class="small-muted">(elige una o varias — cada una aporta su propia parte del pool final)</span></label>
+                <div class="filter-tabs" id="cfgNumEstrategiasChips"></div>
+                <p class="hint" style="margin:6px 0 0;">"Descuenta últimos sorteo" solo se puede elegir si "Excluir sorteos recientes del lado ganador" (más abajo) está activo.</p>
+              </div>
+
+              <div class="field" style="max-width:260px;">
+                <label>Cantidad para "Ganar 85% seguro"</label>
+                <input type="number" id="cfgNumCantidadGanar85" min="30" max="50" step="1" />
+                <p class="hint" style="margin:6px 0 0;">Entre 30 y 50 números. Tripleta/Palé/Quiniela salen de este mismo pool.</p>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="cfgNumTendenciaSwitch" style="width:max-content;">
+                  <input type="checkbox" id="cfgNumTendenciaCheck" />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Aplicar tendencia Alto/Bajo (quinielas)</span>
+                </label>
+              </div>
+              <div class="grid grid-2" id="cfgNumTendenciaSorteosWrap">
+                <div class="field">
+                  <label>Sorteos a analizar para la tendencia</label>
+                  <input type="number" id="cfgNumSorteosTendencia" min="3" max="15" step="2" />
+                  <p class="hint" style="margin:6px 0 0;">Cantidad impar, de 3 a 15 sorteos.</p>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="cfgNumExclusionSwitch" style="width:max-content;">
+                  <input type="checkbox" id="cfgNumExclusionCheck" />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Excluir sorteos recientes del lado ganador</span>
+                </label>
+              </div>
+              <div id="cfgNumExclusionOpcionesWrap">
+                <div class="grid grid-2">
+                  <div class="field">
+                    <label>Cantidad de sorteos recientes a excluir</label>
+                    <input type="number" id="cfgNumExclusionCantidad" min="1" max="15" step="1" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label>¿Qué posición del sorteo se excluye? <span class="small-muted">(elige una o varias)</span></label>
+                  <div class="filter-tabs" id="cfgNumExclusionPosicionesChips">
+                    <div class="filter-tab" data-pos="0">1ra posición</div>
+                    <div class="filter-tab" data-pos="1">2da posición</div>
+                    <div class="filter-tab" data-pos="2">3ra posición</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="cfgNumMartingalaSwitch" style="width:max-content;">
+                  <input type="checkbox" id="cfgNumMartingalaCheck" />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Martingala activa</span>
+                </label>
+                <p class="hint" style="margin:6px 0 0;">Si está desactivada, las jugadas de esta estrategia (Cargar tipos) siempre sugieren el monto base, sin escalar aunque el jugador pierda seguido.</p>
+              </div>
+              <div class="grid grid-2" id="cfgNumMartingalaNivelWrap">
+                <div class="field">
+                  <label>Nivel máximo de martingala</label>
+                  <input type="number" id="cfgNumMartingalaNivel" min="1" max="10" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">Entre 1 y 10 niveles.</p>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-sm" id="btnCfgGuardarNumerologo" type="button" style="margin-top:6px;">Guardar Numerólogo</button>
+              <span class="small-muted" id="cfgNumGuardadoTxt" style="margin-left:10px;"></span>
+            </div>
+          </div>
+
+          <!-- ============ 2) GENERAR NUMERÓLOGO (tendencia) ============ -->
+          <div class="card">
+            <div class="card-head">
+              <h3> Generar numerólogo <span class="small-muted" style="font-weight:400;">(tendencia)</span></h3>
+            </div>
+            <div class="card-body">
+              <p class="hint" style="margin-top:0;">
+                Usado solo dentro de <b>Enviar jugada</b>. Vota alto/bajo con el primer premio de los últimos sorteos
+                elegidos, y arma el pool del lado ganador quitando primeros premios recientes de ese mismo lado hasta
+                dejar la cantidad objetivo. El resultado se reparte entre los jugadores marcados.
+              </p>
+              <div class="grid grid-2">
+                <div class="field">
+                  <label>Sorteos a analizar para la tendencia</label>
+                  <input type="number" id="cfgTendSorteos" min="1" max="15" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">De 1 a 15 sorteos.</p>
+                </div>
+                <div class="field">
+                  <label>Cantidad objetivo de números</label>
+                  <input type="number" id="cfgTendCantidad" min="20" max="60" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">Entre 20 y 60 números.</p>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="cfgTendMartingalaSwitch" style="width:max-content;">
+                  <input type="checkbox" id="cfgTendMartingalaCheck" />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Martingala activa</span>
+                </label>
+                <p class="hint" style="margin:6px 0 0;">Si está desactivada, las jugadas de esta estrategia siempre sugieren el monto base, sin escalar aunque el jugador pierda seguido.</p>
+              </div>
+              <div class="grid grid-2" id="cfgTendMartingalaNivelWrap">
+                <div class="field">
+                  <label>Nivel máximo de martingala</label>
+                  <input type="number" id="cfgTendMartingalaNivel" min="1" max="10" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">Entre 1 y 10 niveles.</p>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-sm" id="btnCfgGuardarTendencia" type="button">Guardar</button>
+              <span class="small-muted" id="cfgTendGuardadoTxt" style="margin-left:10px;"></span>
+            </div>
+          </div>
+
+          <!-- ============ 3) NUMEROLOGITOS ============ -->
+          <div class="card">
+            <div class="card-head">
+              <h3> Numerologitos</h3>
+            </div>
+            <div class="card-body">
+              <p class="hint" style="margin-top:0;">
+                Usado solo dentro de <b>Enviar jugada</b>. La tendencia se decide SOLO con el sorteo más reciente;
+                excluye del lado ganador lo que salió en 1ra/2da/3ra de los últimos sorteos elegidos, y si sobran
+                más que la cantidad objetivo, recorta los más fríos.
+              </p>
+              <div class="grid grid-2">
+                <div class="field">
+                  <label>Sorteos recientes a excluir</label>
+                  <input type="number" id="cfgNtoSorteos" min="1" max="20" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">De 1 a 20 sorteos.</p>
+                </div>
+                <div class="field">
+                  <label>Cantidad objetivo de números</label>
+                  <input type="number" id="cfgNtoCantidad" min="10" max="40" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">Entre 10 y 40 números.</p>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="cfgNtoMartingalaSwitch" style="width:max-content;">
+                  <input type="checkbox" id="cfgNtoMartingalaCheck" />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Martingala activa</span>
+                </label>
+                <p class="hint" style="margin:6px 0 0;">Si está desactivada, las jugadas de esta estrategia siempre sugieren el monto base, sin escalar aunque el jugador pierda seguido.</p>
+              </div>
+              <div class="grid grid-2" id="cfgNtoMartingalaNivelWrap">
+                <div class="field">
+                  <label>Nivel máximo de martingala</label>
+                  <input type="number" id="cfgNtoMartingalaNivel" min="1" max="10" step="1" />
+                  <p class="hint" style="margin:6px 0 0;">Entre 1 y 10 niveles.</p>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-sm" id="btnCfgGuardarNumerologitos" type="button">Guardar</button>
+              <span class="small-muted" id="cfgNtoGuardadoTxt" style="margin-left:10px;"></span>
+            </div>
+          </div>
+
+          <div class="toolbar" style="justify-content:flex-end;">
+            <button class="btn btn-outline" id="btnCfgRestaurar" type="button">Restaurar valores por defecto (las 3 secciones)</button>
+          </div>
+        </div>
+
+        <!-- ---------------- ADMIN: SIMULACIÓN ---------------- -->
+        <div class="view" id="v-simulacion">
+          <p class="hint" style="margin-top:0;">
+            Corre una simulación histórica de martingala: elige una lotería, un tipo de jugada, una fecha de partida
+            y una estrategia (la misma que usa <b>Enviar jugada</b>). La app recorre, día por día, cada sorteo REAL
+            desde esa fecha hasta hoy, generando los números exactamente como lo haría en vivo — usando SOLO el
+            historial de Firestore disponible hasta el día ANTERIOR a cada sorteo, nunca resultados futuros — y
+            aplicando la martingala real de la app (hasta Nivel 4) contra el resultado oficial de cada día.
+          </p>
+
+          <div class="card">
+            <div class="card-head"><h3>Parámetros de la simulación</h3></div>
+            <div class="card-body">
+              <div class="grid grid-2">
+                <div class="field">
+                  <label>Lotería <span class="small-muted">(solo loterías con más de una jugada)</span></label>
+                  <select id="simLoteria"></select>
+                </div>
+                <div class="field">
+                  <label>Fecha de partida</label>
+                  <input type="date" id="simFechaPartida" />
+                  <p class="hint" style="margin:6px 0 0;">La simulación corre desde este día hasta hoy.</p>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Tipo de jugada</label>
+                <div class="filter-tabs" id="simTipoChips">
+                  <div class="filter-tab active" data-tipo="QUINIELA">Quiniela (1 número)</div>
+                  <div class="filter-tab" data-tipo="PALE">Palé (2 números)</div>
+                  <div class="filter-tab" data-tipo="TRIPLETAS">Tripleta (3 números)</div>
+                  <div class="filter-tab" data-tipo="GANAR 85% SEGURO">Ganar 85% seguro</div>
+                </div>
+              </div>
+              <div class="field" id="simGanar85Wrap" style="display:none; max-width:280px;">
+                <label>Cantidad de números para "Ganar 85% seguro"</label>
+                <input type="number" id="simGanar85Cantidad" min="5" max="60" step="1" value="30" />
+                <p class="hint" style="margin:6px 0 0;">Entre 5 y 60 números.</p>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label>Estrategia <span class="small-muted">(elige una sola — funciona igual que en "Enviar jugada", con la configuración actual)</span></label>
+                <div class="filter-tabs" id="simEstrategiaChips">
+                  <div class="filter-tab active" data-estrategia="numerologo">Cargar tipos (Numerólogo)</div>
+                  <div class="filter-tab" data-estrategia="tendencia">Generar numerólogo (tendencia)</div>
+                  <div class="filter-tab" data-estrategia="numerologitos">Numerologitos</div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field">
+                <label class="cfg-altobajo-switch" id="simMartingalaSwitch" style="width:max-content;">
+                  <input type="checkbox" id="simMartingalaCheck" checked />
+                  <span class="cfg-altobajo-track"><span class="cfg-altobajo-thumb"></span></span>
+                  <span class="cfg-altobajo-label">Martingala activa</span>
+                </label>
+                <p class="hint" style="margin:6px 0 0;">Si está desactivada, cada apuesta usa siempre el monto base (sin escalar, aunque se pierda seguido).</p>
+              </div>
+              <div class="field" id="simMartingalaNivelWrap" style="max-width:280px;">
+                <label>Nivel máximo de martingala</label>
+                <input type="number" id="simMartingalaNivelMax" min="1" max="10" step="1" value="4" />
+                <p class="hint" style="margin:6px 0 0;">Entre 1 y 10 niveles.</p>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="field" style="max-width:280px;">
+                <label>Inversión de partida (RD$)</label>
+                <input type="number" id="simInversion" min="0" step="0.01" value="1000" />
+                <p class="hint" style="margin:6px 0 0;">Saldo con el que arranca la simulación.</p>
+              </div>
+
+              <div class="field" style="max-width:280px;">
+                <label>Inversión inicial por número (RD$)</label>
+                <input type="number" id="simMontoBase" min="1" max="100" step="1" value="5" />
+                <p class="hint" style="margin:6px 0 0;">Monto de la apuesta base en Nivel 1 (sin racha activa). Entre RD$1 y RD$100.</p>
+              </div>
+
+              <button class="btn btn-primary" id="btnSimular" type="button">Simular</button>
+              <span class="small-muted" id="simEstado" style="margin-left:10px;"></span>
+            </div>
+          </div>
+
+          <div id="simResultadosWrap" style="display:none;">
+            <div class="grid grid-3" style="margin-top:18px;">
+              <div class="stat-card"><div class="lbl"> Saldo inicial</div><div class="val" id="simSaldoInicial">RD$0</div></div>
+              <div class="stat-card"><div class="lbl"> Pérdida máxima</div><div class="val danger" id="simPerdidaMaxima">RD$0</div></div>
+              <div class="stat-card"><div class="lbl"> Ganancia máxima</div><div class="val success" id="simGananciaMaxima">RD$0</div></div>
+            </div>
+            <div class="grid grid-3" style="margin-top:18px;">
+              <div class="stat-card"><div class="lbl"> Máximo nivel de martingala alcanzado</div><div class="val" id="simMaxNivel">—</div></div>
+              <div class="stat-card"><div class="lbl"> Saldo final</div><div class="val" id="simSaldoFinal">RD$0</div></div>
+              <div class="stat-card"><div class="lbl"> Sorteos jugados</div><div class="val" id="simSorteosJugados">0</div></div>
+            </div>
+
+            <div class="card roi-card-final" id="simCardFinal" style="margin-top:18px;">
+              <div class="card-body" style="text-align:center; padding:32px 20px;">
+                <div class="lbl" style="font-size:12.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">Ganancia / pérdida neta de la simulación</div>
+                <div id="simValorFinal" class="roi-valor">RD$0</div>
+                <div class="small-muted" id="simResumenTexto" style="margin-top:10px;">—</div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:18px;">
+              <div class="card-head">
+                <h3>Detalle día por día</h3>
+                <span class="small-muted" id="simCantidadSorteos">0 sorteos</span>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <div class="table-wrap-desktop">
+                  <table>
+                    <thead><tr><th>Fecha</th><th>Nivel</th><th>Números jugados</th><th>Monto x número</th><th>Invertido</th><th>Resultado oficial</th><th>Ganado</th><th>Saldo</th></tr></thead>
+                    <tbody id="simTablaDetalle"><tr class="empty-row"><td colspan="8">Corre una simulación para ver el detalle.</td></tr></tbody>
+                  </table>
+                </div>
+                <div class="cards-wrap-mobile" id="simCardsDetalle"></div>
+              </div>
+            </div>
+
+            <p class="small-muted" style="margin-top:10px;" id="simNotaQuiebra"></p>
+          </div>
+
+          <p class="small-muted" style="margin-top:10px;">Los días sin números generables (historial insuficiente todavía) o sin resultado oficial publicado se saltan — no se cuentan como jugada ni afectan la martingala. Si el saldo no alcanza para cubrir la siguiente apuesta, la simulación se detiene ahí ("banca agotada").</p>
+        </div>
+
+        <!-- ---------------- CHAT (admin y vendedores, grupal) ---------------- -->
+        <div class="view" id="v-chat">
+          <div class="card chat-card">
+            <div class="card-head">
+              <h3><span class="material-symbols-rounded" style="vertical-align:-6px; margin-right:4px;">forum</span>Chat del equipo</h3>
+              <span class="small-muted">Admin y jugadores, todos en el mismo chat</span>
+              <button class="btn btn-outline btn-sm" id="btnLimpiarChat" type="button" style="display:none; margin-left:auto;" title="Borra los mensajes de más de 7 días. Siempre se conserva la última semana.">
+                <span class="material-symbols-rounded" style="font-size:16px; vertical-align:-3px;">delete_sweep</span> Limpiar chat
+              </button>
+            </div>
+            <div class="chat-mensajes" id="chatMensajes">
+              <div class="empty-state" id="chatVacio">
+                <div class="ic"></div>
+                Aún no hay mensajes. ¡Escribe el primero!
+              </div>
+            </div>
+
+            <form class="chat-input-row" id="formChatMensaje">
+              <input type="text" id="chatInputTexto" placeholder="Escribe un mensaje…" autocomplete="off" />
+              <button type="submit" class="chat-send-btn" id="btnEnviarChatTexto" title="Enviar">
+                <span class="material-symbols-rounded">send</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MODALES ======================= -->
+
+<!-- Nuevo vendedor -->
+<div class="modal-bg" id="modalDescuentoNomina">
+  <div class="modal">
+    <div class="modal-head"><h3>Aplicar descuento a nómina</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;" id="dnVendedorTxt">Vendedor</p>
+      <p class="hint" style="margin-top:-8px;">Usa esto cuando el jugador no confirme una solicitud de cobro, pierda un ticket, o su saldo no coincida con el flujo actual. El monto se restará de su próximo pago de nómina.</p>
+      <div class="field"><label>Monto a descontar (RD$)</label><input id="dnMonto" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+      <div class="field"><label>Motivo</label><textarea id="dnMotivo" rows="2" placeholder="Ej. Ticket físico perdido, jugada #1234"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarDescuentoNomina">Aplicar descuento</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalPagarNomina">
+  <div class="modal">
+    <div class="modal-head"><h3>Pagar nómina</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;" id="pnVendedorTxt">Vendedor</p>
+      <div class="cobro-info-grid">
+        <div class="cobro-info-item"><div class="lbl">Pago quincenal</div><div class="val" id="pnBruto">RD$0</div></div>
+        <div class="cobro-info-item"><div class="lbl">Descuentos pendientes</div><div class="val" id="pnDescuentos">RD$0</div></div>
+      </div>
+      <div class="cobro-monto-wrap" style="margin-top:14px;">
+        <span class="lbl">Neto a pagar</span>
+        <span class="val" id="pnNeto">RD$0</span>
+      </div>
+      <p class="hint" style="margin-top:14px;">Este pago se restará del saldo actual de la banca.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarPagoNomina">Confirmar pago</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalSaldoInicial">
+  <div class="modal">
+    <div class="modal-head"><h3>Saldo inicial de la banca</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">Este es el capital base con el que arranca todo el cálculo de la función "Saldo". Cámbialo solo si necesitas corregir el punto de partida.</p>
+      <div class="field"><label>Saldo inicial (RD$)</label><input id="siMonto" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarSaldoInicial">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalAbrirCaja">
+  <div class="modal">
+    <div class="modal-head"><h3>Abrir caja de hoy</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">Indica con cuánto efectivo estás abriendo la caja hoy. Este monto quedará registrado para tu historial.</p>
+      <div class="field"><label>Monto de apertura (RD$)</label><input id="cajaMontoApertura" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarAbrirCaja">Abrir caja</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalCerrarCaja">
+  <div class="modal">
+    <div class="modal-head"><h3>Cerrar caja de hoy</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">Este es el arqueo automático del día, calculado con tus movimientos confirmados. Cuenta tu efectivo real y compáralo contra lo esperado antes de cerrar.</p>
+
+      <div id="arqueoDetalle" style="background:var(--surface-2); border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:16px; font-size:13.5px;">
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span class="small-muted">Monto de apertura</span>
+          <span class="mono" id="arqApertura">RD$0</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span class="small-muted">+ Cobros de premios recibidos (<span id="arqCobrosCant">0</span>)</span>
+          <span class="mono" id="arqCobros" style="color:var(--success);">+RD$0</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span class="small-muted">+ Recargas de saldo recibidas (<span id="arqRecargasCant">0</span>)</span>
+          <span class="mono" id="arqRecargas" style="color:var(--success);">+RD$0</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span class="small-muted">− Jugadas realizadas en banca (<span id="arqJugadasCant">0</span>)</span>
+          <span class="mono" id="arqJugadas" style="color:var(--danger);">−RD$0</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span class="small-muted">− Depósitos confirmados, efectivo + transferencia (<span id="arqDepositosCant">0</span>)</span>
+          <span class="mono" id="arqDepositos" style="color:var(--danger);">−RD$0</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0 0; margin-top:6px; border-top:1.5px dashed var(--border); font-weight:700;">
+          <span>Efectivo esperado en caja</span>
+          <span class="mono" id="arqEsperado">RD$0</span>
+        </div>
+      </div>
+
+      <div class="field"><label>Efectivo real contado (RD$)</label><input id="cajaMontoCierre" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+
+      <div id="arqDiferenciaBox" style="display:none; border-radius:10px; padding:10px 13px; margin-top:4px; font-size:13.5px; font-weight:600;"></div>
+
+      <div id="arqDetalleMovimientos" style="display:none; margin-top:14px;">
+        <p class="small-muted" style="font-weight:700; margin-bottom:6px;">Detalle de movimientos de hoy (para que no queden dudas):</p>
+        <div id="arqListaMovimientos" style="max-height:180px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:12.5px;"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarCerrarCaja">Cerrar caja</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalNuevoVendedor">
+  <div class="modal">
+    <div class="modal-head"><h3>Nuevo jugador</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nombre completo</label><input id="nvNombre" /></div>
+      <div class="field"><label>Usuario (para iniciar sesión)</label><input id="nvUsuario" /></div>
+      <div class="field"><label>Clave</label><input id="nvClave" type="password" minlength="4" /></div>
+      <div class="field"><label>Saldo inicial (RD$)</label><input id="nvSaldo" type="number" min="0" value="0" /></div>
+      <div class="field"><label>Pago quincenal (RD$)</label><input id="nvPagoQuincenal" type="number" min="0" value="0" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarVendedor">Crear jugador</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editar vendedor -->
+<div class="modal-bg" id="modalEditarVendedor">
+  <div class="modal">
+    <div class="modal-head"><h3>Editar jugador</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nombre completo</label><input id="evNombre" /></div>
+      <div class="field"><label>Usuario (para iniciar sesión)</label><input id="evUsuario" disabled /></div>
+      <div class="field">
+        <label>Nueva clave (opcional)</label>
+        <input id="evClave" type="password" minlength="4" placeholder="Déjalo en blanco para no cambiarla" />
+      </div>
+      <div class="field"><label>Pago quincenal (RD$)</label><input id="evPagoQuincenal" type="number" min="0" value="0" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarEdicionVendedor">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ajustar saldo -->
+<div class="modal-bg" id="modalAjusteSaldo">
+  <div class="modal">
+    <div class="modal-head"><h3>Recargar saldo</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;" id="ajusteVendedorTxt"></p>
+      <p class="hint" style="margin-top:0;">Esta función solo <b>recarga</b> (suma) saldo al jugador. Para descontarle dinero, pídele que reporte un <b>depósito</b> desde su cuenta.</p>
+      <div class="field"><label>Monto a recargar (RD$)</label><input id="ajusteMonto" type="number" min="0" /></div>
+      <div class="field"><label>Motivo</label><input id="ajusteMotivo" placeholder="ej. Recarga de efectivo" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarAjuste">Recargar saldo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Historial de recargas de un jugador -->
+<div class="modal-bg" id="modalHistorialRecargas">
+  <div class="modal">
+    <div class="modal-head"><h3>Historial de recargas</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;" id="histRecargasVendedorTxt"></p>
+      <div id="histRecargasLista"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva cuenta bancaria -->
+<div class="modal-bg" id="modalNuevaCuenta">
+  <div class="modal">
+    <div class="modal-head"><h3>Nueva cuenta para transferencias</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Banco</label><input id="ncBanco" placeholder="ej. Banreservas" /></div>
+      <div class="field">
+        <label>Tipo de cuenta</label>
+        <select id="ncTipo">
+          <option value="Ahorros">Ahorros</option>
+          <option value="Corriente">Corriente</option>
+        </select>
+      </div>
+      <div class="field"><label>Número de cuenta</label><input id="ncNumero" placeholder="ej. 1234567890" /></div>
+      <div class="field"><label>Titular</label><input id="ncTitular" placeholder="Nombre del titular de la cuenta" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarCuenta">Guardar cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Solicitar depósito a un jugador -->
+<div class="modal-bg" id="modalSolicitarDeposito">
+  <div class="modal">
+    <div class="modal-head"><h3>Solicitar depósito</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">Le va a aparecer un aviso en su pantalla de "Depositar" para que reporte el depósito. Esto NO mueve saldo todavía — el saldo solo se descuenta cuando confirmes el depósito que él reporte.</p>
+      <div class="field">
+        <label>Jugador</label>
+        <select id="solDepJugador"></select>
+      </div>
+      <div class="field"><label>Monto sugerido (RD$) <span class="small-muted">(opcional)</span></label><input id="solDepMonto" type="number" min="0" placeholder="0.00" /></div>
+      <div class="field"><label>Motivo / nota <span class="small-muted">(opcional)</span></label><input id="solDepNota" placeholder="ej. Falta cubrir el sorteo de esta tarde" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnEnviarSolicitudDeposito">Enviar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nueva jugada -->
+<div class="modal-bg" id="modalNuevaJugada">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head"><h3>Enviar jugada a jugadores</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Jugadores</label>
+        <div class="nj-jugadores-toolbar">
+          <button type="button" class="btn btn-outline btn-sm" id="btnNJMarcarTodos">Marcar todos</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnNJDesmarcarTodos">Desmarcar todos</button>
+          <span class="small-muted" id="njJugadoresContador">0 seleccionados</span>
+        </div>
+        <div class="nj-jugadores-list" id="njJugadoresList"></div>
+        <div class="hint">Elige a uno, varios o todos los jugadores. La jugada se enviará a cada uno con su propio nivel de martingala.</div>
+      </div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Lotería</label>
+          <div class="filter-tabs" id="filtroTipoLoteriaNJ" style="margin-bottom:6px;"></div>
+          <select id="njLoteria"></select>
+        </div>
+        <div class="field"><label>Fecha del sorteo</label><input type="date" id="njFecha" /></div>
+      </div>
+      <div class="field">
+        <label>Hora límite / hora del sorteo</label>
+        <input type="time" id="njHoraSorteo" />
+        <div class="hint">Se sugiere sola según la lotería elegida; puedes ajustarla. El jugador verá una cuenta regresiva hasta esta hora.</div>
+      </div>
+
+      <div class="field">
+        <label>Tipo de jugada (según el Numerólogo)</label>
+        <div class="avail-numbers" style="margin-bottom:6px;">
+          <div class="small-muted" id="njTiposEstado">Elige lotería y fecha, luego toca "Cargar tipos".</div>
+          <div class="filter-tabs" id="njTiposChips" style="margin-top:8px;"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btnCargarTiposNJ" type="button"> Cargar tipos del Numerólogo</button>
+        <div class="nj-numerologo-botones">
+          <button class="btn btn-outline btn-sm" id="btnGenerarNumerologo" type="button"> Generar numerólogo (tendencia)</button>
+          <button class="btn btn-outline btn-sm" id="btnGenerarNumerologuitos" type="button"> Numerologuitos</button>
+        </div>
+        <div class="avail-numbers nj-generado-box" id="njGeneradoBox" style="display:none;">
+          <div class="small-muted" id="njGeneradoEstado"></div>
+        </div>
+        <div class="hint">"Cargar tipos" <b>genera</b> los números por tipo de jugada al vuelo (mismo motor y configuración que "Números → Numerólogo" en Configuración). "Generar numerólogo" calcula por tendencia (alto/bajo) y reparte entre los jugadores marcados arriba, cada uno con una porción distinta. "Numerologuitos" es otra forma de generarlos: usa solo el último sorteo para la tendencia y excluye del lado ganador lo que ya salió en 1ra/2da/3ra de los sorteos recientes — también repartidos entre los jugadores marcados. Las cantidades y sorteos de cada una se ajustan en <b>Configuración</b>.</div>
+        <p class="small-muted" style="margin:6px 0 0;">Todos los parámetros de estas 3 formas de generar números se editan en Configuración → Numerólogo / Generar numerólogo (tendencia) / Numerologitos.</p>
+      </div>
+
+      <div class="field">
+        <label>Tipo de jugada</label>
+        <input id="njTipo" placeholder="ej. Quiniela, Palé, Tripleta..." />
+        <div class="hint">Se llena solo al tocar un tipo arriba, o escríbelo tú mismo.</div>
+      </div>
+      <div class="field">
+        <label>Números (separados por coma)</label>
+        <textarea id="njNumeros" rows="2" placeholder="ej. 05, 18, 27"></textarea>
+        <div class="hint">Se llena solo con los números del tipo elegido; puedes editarlos antes de enviar.</div>
+      </div>
+      <div class="field">
+        <label>Monto por número (por jugador)</label>
+        <div class="hint">Se calcula sola según la racha de martingala de cada jugador en esta lotería. Si un jugador no tiene pérdidas activas, se usa monto manual (por defecto RD$5, editable).</div>
+        <div class="nj-montos-list" id="njMontosPorJugador">
+          <div class="small-muted" id="njMontosVacio" style="padding:10px 2px;">Selecciona al menos un jugador y una lotería para ver los montos.</div>
+        </div>
+      </div>
+      <div class="field"><label>Monto total a enviar (todos los jugadores)</label><input id="njTotal" disabled /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnEnviarJugada">Enviar jugada</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmar jugada (vendedor) -->
+<div class="modal-bg" id="modalConfirmarJugada">
+  <div class="modal">
+    <div class="modal-head"><h3>Confirmar jugada</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">Ingresa la banca donde jugaste estos números y el ID/número de ticket físico que te dio la agencia. Al confirmar, se descontará el monto de tu saldo.</p>
+      <div class="field"><label>Banca</label><input id="cjBanca" placeholder="ej. Banca El Sol" /></div>
+      <div class="field"><label>ID de ticket físico</label><input id="cjTicketFisico" placeholder="ej. 00123456" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-success" id="btnConfirmarJugada">Confirmar y descontar saldo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rechazar (genérico: jugada o cobro) -->
+<div class="modal-bg" id="modalRechazar">
+  <div class="modal">
+    <div class="modal-head"><h3>Rechazar</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Motivo (opcional)</label><input id="rechazoMotivo" placeholder="ej. Lotería ya cerrada" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-danger" id="btnConfirmarRechazo">Rechazar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevo cobro -->
+<div class="modal-bg" id="modalNuevoCobro">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Enviar solicitud de cobro</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">El sistema revisa automáticamente los resultados oficiales. Abajo verás las jugadas confirmadas <b>en espera</b> del sorteo y las que ya resultaron <b>ganadoras</b>. Toca una o varias ganadoras para incluirlas en la solicitud; puedes enviarlas todas juntas.</p>
+
+      <div class="nc-section">
+        <div class="nc-section-head">
+          <span class="dot-ind esp"></span>
+          <h4> En espera del sorteo</h4>
+          <span class="nc-count esp" id="ncCountEspera">0</span>
+        </div>
+        <div class="nc-list" id="ncListaEspera">
+          <div class="cobro-select-empty">Buscando jugadas...</div>
+        </div>
+      </div>
+
+      <div class="nc-section">
+        <div class="nc-section-head">
+          <span class="dot-ind gan"></span>
+          <h4> Ganadoras · listas para cobrar</h4>
+          <span class="nc-count gan" id="ncCountGanadoras">0</span>
+        </div>
+        <div class="nc-list" id="ncListaGanadoras">
+          <div class="cobro-select-empty">Buscando jugadas...</div>
+        </div>
+      </div>
+
+      <div id="ncPreview" class="cobro-card" style="display:none; margin-top:14px; margin-bottom:0;">
+        <div class="cobro-head">
+          <div class="cobro-head-left">
+            <div class="cobro-ic"></div>
+            <div>
+              <div class="cobro-title" id="ncPreviewTitulo">Resumen del cobro</div>
+            </div>
+          </div>
+        </div>
+        <div class="cobro-body">
+          <div id="ncPreviewLista"></div>
+          <div class="cobro-monto-wrap">
+            <span class="lbl" id="ncPreviewMontoLabel">Importe a cobrar</span>
+            <span class="val" id="ncPreviewMonto">RD$0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close>Cancelar</button>
+      <button class="btn btn-primary" id="btnEnviarCobro" disabled>Enviar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="js/config.js?v=202608052020"></script>
+<script src="js/state.js?v=202608052020"></script>
+<script src="js/utils.js?v=202608052020"></script>
+<script src="js/auth.js?v=202608052020"></script>
+<script src="js/nav.js?v=202608052020"></script>
+<script src="js/loterias.js?v=202608052020"></script>
+<script src="js/generador-numeros.js?v=202608052020"></script>
+<script src="js/admin-core.js?v=202608052020"></script>
+<script src="js/vendedores.js?v=202608052020"></script>
+<script src="js/jugadas.js?v=202608052020"></script>
+<script src="js/resultados-engine.js?v=202608052020"></script>
+<script src="js/roi.js?v=202608052020"></script>
+<script src="js/simulacion.js?v=202608052020"></script>
+<script src="js/resultados.js?v=202608052020"></script>
+<script src="js/saldo.js?v=202608052020"></script>
+<script src="js/nomina.js?v=202608052020"></script>
+<script src="js/cobros.js?v=202608052020"></script>
+<script src="js/depositos.js?v=202608052020"></script>
+<script src="js/vendedor-core.js?v=202608052020"></script>
+<script src="js/caja.js?v=202608052020"></script>
+<script src="js/numeros.js?v=202608052020"></script>
+<script src="js/configuracion.js?v=202608052020"></script>
+<script src="js/chat.js?v=202608052020"></script>
+<script src="js/nav-android.js?v=202608052020"></script>
+</body>
+</html>

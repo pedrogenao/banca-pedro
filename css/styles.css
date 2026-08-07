@@ -1,0 +1,754 @@
+  :root{
+    --bg:#f4f2fa;
+    --surface:#ffffff;
+    --surface-2:#faf9fd;
+    --text:#241f33;
+    --muted:#6e6680;
+    --border:#e6e1f2;
+    --primary:#6a1b9a;
+    --primary-dark:#4a1268;
+    --primary-soft:#f1e6fb;
+    --accent:#c98a1e;
+    --accent-soft:#fbf0da;
+    --success:#1f9d55;
+    --success-soft:#e5f7ec;
+    --danger:#d1394a;
+    --danger-soft:#fbe7ea;
+    --terciario:#2f6fed;
+    --terciario-soft:#e8f0fe;
+    --radius:16px;
+    --radius-lg:24px;
+    /* Sombras de "elevación" Material: dos capas (ambient + key light) */
+    --elevation-1: 0 1px 2px rgba(30,10,45,.10), 0 1px 3px 1px rgba(30,10,45,.08);
+    --elevation-2: 0 1px 2px rgba(30,10,45,.10), 0 2px 6px 2px rgba(30,10,45,.10);
+    --elevation-3: 0 4px 8px 3px rgba(30,10,45,.10), 0 1px 3px rgba(30,10,45,.14);
+    --shadow: var(--elevation-1);
+    font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    min-height:100vh; min-height:100dvh;
+    overscroll-behavior-y:contain; touch-action:manipulation;
+  }
+  button, .btn, .navitem, .cobro-select-card.ganadora, .modal-close{ touch-action:manipulation; }
+  .mono{ font-family:'Consolas','Courier New',monospace; letter-spacing:.5px; }
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle at 20% 20%, #7b1fa2 0%, #4a1268 55%, #2c0b46 100%);
+    padding:20px;
+  }
+  .login-card{
+    background:var(--surface); border-radius:20px; width:100%; max-width:380px;
+    padding:36px 32px; box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .login-logo{
+    width:56px;height:56px;border-radius:14px;
+    background:linear-gradient(135deg,var(--primary),#9c4dd1);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px; color:#fff; margin:0 auto 14px;
+  }
+  .login-title{ text-align:center; font-size:20px; font-weight:700; margin:0 0 4px; }
+  .login-sub{ text-align:center; color:var(--muted); font-size:13px; margin:0 0 24px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:14.5px; background:var(--surface-2); color:var(--text); outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--primary); background:#fff; }
+  .btn{
+    position:relative; overflow:hidden;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:11px 18px; border-radius:12px; border:none; font-size:14.5px; font-weight:600;
+    cursor:pointer; transition:filter .15s, transform .05s, box-shadow .15s;
+  }
+  .btn:active{ transform: scale(.98); }
+  .btn-primary{ background:var(--primary); color:#fff; width:100%; box-shadow:var(--elevation-1); }
+  .btn-primary:active{ box-shadow:none; }
+  .btn-primary:hover{ filter:brightness(1.08); }
+  .btn-ghost{ background:transparent; color:var(--primary); width:100%; margin-top:8px; }
+  .btn-sm{ padding:6px 12px; font-size:13px; border-radius:8px; }
+  .btn-success{ background:var(--success); color:#fff; }
+  .btn-danger{ background:var(--danger); color:#fff; }
+  .btn-outline{ background:#fff; color:var(--text); border:1.5px solid var(--border); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .login-error{
+    background:var(--danger-soft); color:var(--danger); font-size:13px; padding:9px 12px;
+    border-radius:8px; margin-bottom:14px; display:none;
+  }
+  .login-toggle{ text-align:center; margin-top:16px; font-size:13px; color:var(--muted); }
+  .login-toggle a{ color:var(--primary); font-weight:600; cursor:pointer; text-decoration:none; }
+
+  /* ---------- APP SHELL ---------- */
+  #appScreen{ display:none; min-height:100vh; }
+  .shell{ display:flex; min-height:100vh; }
+  .sidebar{
+    width:230px; flex-shrink:0; background:linear-gradient(180deg,#3a0d5c,#5a1685);
+    color:#f2e9fb; display:flex; flex-direction:column; padding:20px 14px;
+    padding-top:calc(20px + env(safe-area-inset-top));
+    position:fixed; top:0; bottom:0; left:0; overflow-y:auto;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding:6px 8px 22px; }
+  .brand .logo{ width:34px;height:34px;border-radius:9px; background:rgba(255,255,255,.15); display:flex;align-items:center;justify-content:center; font-size:18px; }
+  .brand b{ font-size:14.5px; line-height:1.2; }
+  .brand span{ display:block; font-size:11px; color:#d9c3f0; }
+  .navsection{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:#c39fe0; margin:16px 12px 6px; }
+  .navitem{
+    position:relative; overflow:hidden;
+    display:flex; align-items:center; gap:14px; padding:11px 14px; border-radius:28px;
+    color:#e9dcf7; text-decoration:none; font-size:14px; cursor:pointer; margin-bottom:3px;
+    transition: background .15s, color .15s;
+  }
+  .navitem:hover{ background:rgba(255,255,255,.08); }
+  .navitem.active{ background:#fff; color:var(--primary-dark); font-weight:700; }
+  .navitem.active .navicon{ color:var(--primary); }
+  .navitem .navicon{
+    font-size:20px; width:22px; height:22px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    color:#d9c3f0;
+  }
+  .navitem .badge{
+    margin-left:auto; background:var(--danger); color:#fff; font-size:10.5px; font-weight:700;
+    border-radius:20px; padding:1px 7px; min-width:18px; text-align:center;
+  }
+  .sidebar-foot{ margin-top:auto; padding:12px 10px; padding-bottom:calc(12px + env(safe-area-inset-bottom)); }
+
+  .main{ margin-left:230px; flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar{
+    background:linear-gradient(135deg,var(--primary),#7b1fa2); color:#fff;
+    box-shadow:var(--elevation-2); padding:14px 28px;
+    padding-top:calc(14px + env(safe-area-inset-top));
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5;
+  }
+  .topbar h1{ font-size:18px; margin:0; color:#fff; font-weight:600; }
+  .topbar-right{ display:flex; align-items:center; gap:16px; }
+  .saldo-pill{
+    background:rgba(255,255,255,.16); color:#fff; font-weight:700; font-size:14.5px;
+    padding:8px 16px; border-radius:30px; display:flex; align-items:center; gap:6px;
+  }
+  .caja-pill{
+    font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:20px;
+  }
+  .caja-pill.abierta{ background:rgba(255,255,255,.22); color:#fff; }
+  .caja-pill.cerrada{ background:rgba(0,0,0,.22); color:#ffd7db; }
+  .user-chip{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:rgba(255,255,255,.85); }
+  .user-chip .av{ width:30px;height:30px;border-radius:50%; background:rgba(255,255,255,.18); color:#fff; display:flex;align-items:center;justify-content:center; font-weight:700; font-size:13px; }
+  .user-chip #userNombre{ color:#fff !important; }
+  .hamburger{ color:#fff !important; }
+  .hamburger:hover, .hamburger:active{ background:rgba(255,255,255,.14) !important; }
+
+  .content{ padding:26px 28px 60px; padding-bottom:calc(60px + env(safe-area-inset-bottom)); flex:1; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .grid{ display:grid; gap:16px; }
+  .grid-4{ grid-template-columns:repeat(4,1fr); }
+  .grid-3{ grid-template-columns:repeat(3,1fr); }
+  .grid-2{ grid-template-columns:repeat(2,1fr); }
+  @media(max-width:1000px){ .grid-4,.grid-3{ grid-template-columns:repeat(2,1fr); } }
+
+  .stat-card{ background:var(--surface); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); }
+  .stat-card .lbl{ font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:6px; }
+  .stat-card .val{ font-size:24px; font-weight:800; }
+  .stat-card .val.success{ color:var(--success); }
+  .stat-card .val.danger{ color:var(--danger); }
+  .stat-card .val.accent{ color:var(--accent); }
+
+  .card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; overflow:hidden; }
+  .card-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .card-head h3{ margin:0; font-size:15.5px; }
+  .card-body{ padding:20px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  table{ width:100%; min-width:640px; border-collapse:collapse; font-size:13.5px; }
+  th{ text-align:left; padding:10px 20px; background:var(--surface-2); color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--border); }
+  td{ padding:12px 20px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:var(--surface-2); }
+  .empty-row td{ text-align:center; color:var(--muted); padding:30px 20px; }
+
+  .tag{ display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .tag-pendiente{ background:var(--accent-soft); color:var(--accent); }
+  .tag-aceptada{ background:#e4ecfb; color:#2a5ac9; }
+  .tag-confirmada{ background:var(--success-soft); color:var(--success); }
+  .tag-confirmado{ background:var(--success-soft); color:var(--success); }
+  .tag-solicitado{ background:var(--primary-soft); color:var(--primary-dark); }
+  .tag-rechazada{ background:var(--danger-soft); color:var(--danger); }
+  .tag-abierta{ background:var(--success-soft); color:var(--success); }
+
+  .numeros-jugados-wrap{ margin:2px 0; }
+  .numeros-jugados-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+  .numeros-jugados-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .numeros-jugados-count{ font-size:11px; font-weight:700; color:var(--primary-dark); background:var(--primary-soft); padding:2px 10px; border-radius:20px; }
+  .numeros-jugados{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(44px,1fr));
+    gap:6px; max-height:158px; overflow-y:auto; padding:2px 6px 2px 2px;
+  }
+  .numeros-jugados::-webkit-scrollbar{ width:6px; }
+  .numeros-jugados::-webkit-scrollbar-thumb{ background:var(--border); border-radius:10px; }
+  .numeros-jugados-wrap.compacto .numeros-jugados{ grid-template-columns:repeat(auto-fill, minmax(36px,1fr)); gap:5px; max-height:96px; }
+  .numchip{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:38px; height:36px; padding:0 9px; border-radius:9px;
+    background:linear-gradient(180deg,#ffffff 0%,var(--primary-soft) 100%);
+    border:1.5px solid #e2d4f5; color:var(--primary-dark);
+    font-weight:800; font-size:14.5px; letter-spacing:.2px;
+    font-family:'Consolas','Courier New',monospace;
+    box-shadow:0 1px 2px rgba(74,18,104,.07);
+  }
+  .numeros-jugados-wrap.compacto .numchip{ min-width:32px; height:30px; font-size:13px; border-radius:8px; }
+  .numchip.hit{ background:linear-gradient(180deg,#28b463 0%,var(--success) 100%); border-color:var(--success); color:#fff; box-shadow:0 2px 5px rgba(31,157,85,.3); }
+  .numeros-vacio{ color:var(--muted); font-size:13px; font-style:italic; }
+
+  /* ---------- Método de depósito (efectivo / transferencia) ---------- */
+  .metodo-tag{ display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .metodo-tag.efectivo{ background:var(--accent-soft); color:var(--accent); }
+  .metodo-tag.transferencia{ background:#e4ecfb; color:#2a5ac9; }
+
+  /* ---------- Cuentas bancarias del admin ---------- */
+  .cuenta-card{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:13px 16px; border:1.5px solid var(--border); border-radius:12px; margin-bottom:10px; background:var(--surface-2);
+  }
+  .cuenta-card:last-child{ margin-bottom:0; }
+  .cuenta-card .cuenta-ic{ width:38px;height:38px;border-radius:10px; background:var(--primary-soft); color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .cuenta-card .cuenta-info{ flex:1; min-width:0; }
+  .cuenta-card .cuenta-banco{ font-weight:700; font-size:14px; }
+  .cuenta-card .cuenta-num{ font-family:'Consolas','Courier New',monospace; color:var(--muted); font-size:12.5px; letter-spacing:.3px; }
+  .cuenta-card.inactiva{ opacity:.55; }
+  .cuenta-opcion{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 14px; border:1.5px solid var(--border); border-radius:12px; cursor:pointer; margin-bottom:8px;
+    transition:border-color .15s, background .15s;
+  }
+  .cuenta-opcion:last-child{ margin-bottom:0; }
+  .cuenta-opcion:hover{ border-color:var(--primary); background:var(--primary-soft); }
+  .cuenta-opcion.selected{ border-color:var(--primary); background:var(--primary-soft); }
+  .cuenta-opcion .cuenta-info{ flex:1; min-width:0; }
+  .cuenta-opcion .cuenta-banco{ font-weight:700; font-size:14px; }
+  .cuenta-opcion .cuenta-num{ font-family:'Consolas','Courier New',monospace; color:var(--muted); font-size:12.5px; }
+  .cuenta-opcion .check{ width:20px;height:20px;border-radius:50%; border:2px solid var(--border); flex-shrink:0; }
+  .cuenta-opcion.selected .check{ border-color:var(--primary); background:var(--primary); box-shadow:inset 0 0 0 3px #fff; }
+
+  /* ---------- Estado del script (main.py) — "en línea"/"desconectado" ---------- */
+  .script-status-pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700;
+    padding:5px 12px; border-radius:20px; white-space:nowrap;
+  }
+  .script-status-pill.online{ background:var(--success-soft); color:var(--success); }
+  .script-status-pill.offline{ background:var(--danger-soft); color:var(--danger); }
+  .script-status-pill.unknown{ background:var(--surface-2); color:var(--muted); border:1.5px solid var(--border); }
+  #cfgEstadoAdvertencias{ margin-top:8px; }
+  .cfg-advertencia{
+    font-size:12.5px; color:var(--danger); background:var(--danger-soft);
+    border-radius:8px; padding:7px 10px; margin-top:6px; line-height:1.4;
+  }
+
+  /* ---------- Interruptor "Alto/Bajo" dentro de cada estrategia ---------- */
+  .cfg-altobajo-switch{
+    display:flex; align-items:center; gap:7px; flex-shrink:0; cursor:pointer;
+    padding:6px 10px; border-radius:20px; background:var(--surface-2); border:1.5px solid var(--border);
+    transition:border-color .15s, background .15s;
+  }
+  .cfg-altobajo-switch input[type="checkbox"]{ display:none; }
+  .cfg-altobajo-switch .cfg-altobajo-label{ font-size:11.5px; font-weight:700; color:var(--muted); white-space:nowrap; }
+  .cfg-altobajo-switch .cfg-altobajo-track{
+    width:34px; height:20px; border-radius:20px; background:var(--border); position:relative; flex-shrink:0;
+    transition:background .15s;
+  }
+  .cfg-altobajo-switch .cfg-altobajo-thumb{
+    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:#fff; box-shadow:var(--elevation-1); transition:left .15s;
+  }
+  .cfg-altobajo-switch.on{ border-color:var(--primary); background:var(--primary-soft); }
+  .cfg-altobajo-switch.on .cfg-altobajo-track{ background:var(--primary); }
+  .cfg-altobajo-switch.on .cfg-altobajo-thumb{ left:16px; }
+  .cfg-altobajo-switch.on .cfg-altobajo-label{ color:var(--primary-dark); }
+
+  /* ---------- Cuenta regresiva del sorteo ---------- */
+  .countdown{ display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap; }
+  .countdown.cd-ok{ background:var(--success-soft); color:var(--success); }
+  .countdown.cd-warn{ background:var(--accent-soft); color:var(--accent); }
+  .countdown.cd-danger{ background:var(--danger-soft); color:var(--danger); }
+  .countdown.cd-closed{ background:#eceaf1; color:var(--muted); }
+  .countdown .dot{ width:6px;height:6px;border-radius:50%; background:currentColor; }
+
+  /* ---------- Selector de cobros: en espera vs ganadoras ---------- */
+  .nc-section{ margin-bottom:18px; }
+  .nc-section-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .nc-section-head .dot-ind{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .nc-section-head .dot-ind.esp{ background:var(--accent); }
+  .nc-section-head .dot-ind.gan{ background:var(--success); }
+  .nc-section-head h4{ margin:0; font-size:13.5px; font-weight:800; }
+  .nc-section-head .nc-count{
+    margin-left:auto; font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:20px;
+  }
+  .nc-section-head .nc-count.esp{ background:var(--accent-soft); color:var(--accent); }
+  .nc-section-head .nc-count.gan{ background:var(--success-soft); color:var(--success); }
+  .nc-list{ display:flex; flex-direction:column; gap:10px; max-height:260px; overflow-y:auto; padding-right:2px; }
+  .cobro-select-empty{
+    text-align:center; color:var(--muted); font-size:12.5px; padding:16px 10px;
+    background:var(--surface-2); border-radius:10px; border:1px dashed var(--border);
+  }
+  .cobro-select-card{
+    border-radius:12px; padding:12px 14px; border:1.5px solid var(--border); background:var(--surface-2);
+    transition: border-color .15s, transform .05s, box-shadow .15s;
+  }
+  .cobro-select-card.espera{ border-left:4px solid var(--accent); background:var(--accent-soft); }
+  .cobro-select-card.ganadora{ border-left:4px solid var(--success); background:var(--success-soft); cursor:pointer; position:relative; padding-right:38px; }
+  .cobro-select-card.ganadora:hover{ box-shadow:0 3px 12px rgba(31,157,85,.18); transform:translateY(-1px); }
+  .cobro-select-card.ganadora.selected{ border:1.5px solid var(--success); border-left:4px solid var(--success); box-shadow:0 0 0 3px rgba(31,157,85,.18); }
+  .csc-check{
+    position:absolute; top:12px; right:12px; width:20px; height:20px; border-radius:6px;
+    border:1.5px solid var(--border); background:#fff; transition: background .15s, border-color .15s;
+  }
+  .cobro-select-card.ganadora.selected .csc-check{
+    background:var(--success); border-color:var(--success);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='3.5 8.5 6.5 11.5 12.5 4.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:center; background-size:12px 12px;
+  }
+  .csc-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+  .csc-ticket{ font-weight:800; font-size:13.5px; }
+  .csc-monto{ font-weight:800; font-size:14.5px; color:var(--success); }
+  .csc-mid{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .csc-tag{
+    font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;
+    background:#fff; color:var(--muted); border:1px solid var(--border);
+  }
+  .csc-numeros{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+  .csc-foot{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+  .csc-select-hint{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--success);
+    margin-top:6px;
+  }
+  .cobro-select-card.ganadora.selected .csc-select-hint::before{ content:"✓ Seleccionada"; }
+  .cobro-select-card.ganadora:not(.selected) .csc-select-hint::before{ content:"Tocar para seleccionar"; color:var(--muted); }
+  .cobro-select-card.ganadora:not(.selected) .csc-select-hint{ color:var(--muted); }
+
+  /* ---------- ROI ---------- */
+  .roi-card-final{ transition: background .2s; }
+  .roi-card-final.roi-positivo{ background:linear-gradient(135deg,var(--success-soft),#ffffff); }
+  .roi-card-final.roi-negativo{ background:linear-gradient(135deg,var(--danger-soft),#ffffff); }
+  .roi-card-final.roi-neutro{ background:var(--surface-2); }
+  .roi-valor{ font-size:42px; font-weight:800; letter-spacing:-.5px; }
+  .roi-valor.positivo{ color:var(--success); }
+  .roi-valor.negativo{ color:var(--danger); }
+  .roi-resultado-tag{ font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:20px; }
+  .roi-resultado-tag.ganadora{ background:var(--success-soft); color:var(--success); }
+  .roi-resultado-tag.perdida{ background:var(--danger-soft); color:var(--danger); }
+  .roi-resultado-tag.abierta{ background:var(--success-soft); color:var(--success); }
+  .roi-resultado-tag.cerrada{ background:var(--danger-soft); color:var(--danger); }
+
+  /* ---------- Tarjetas de premio / cobro ---------- */
+  .premio-chip{ display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; font-weight:700; font-size:12.5px; margin:3px 3px 0 0; border:1px solid transparent; }
+  .premio-chip .num{ font-family:'Consolas','Courier New',monospace; font-weight:800; }
+  .premio-chip.p1{ background:linear-gradient(135deg,#fff3d1,#ffe6a8); color:#8a5b00; border-color:#f0d78c; }
+  .premio-chip.p2{ background:linear-gradient(135deg,#eef1f6,#dfe4ec); color:#4a5568; border-color:#cfd6e0; }
+  .premio-chip.p3{ background:linear-gradient(135deg,#fbe4d2,#f6d0b0); color:#8a4a1c; border-color:#eab98c; }
+
+  .cobro-card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden; border:1px solid var(--border); }
+  .cobro-card .cobro-head{ padding:16px 20px; background:linear-gradient(135deg,var(--primary-soft),#fbf9fe); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .cobro-card .cobro-head-left{ display:flex; align-items:center; gap:12px; }
+  .cobro-card .cobro-ic{ width:38px; height:38px; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 1px 4px rgba(74,18,104,.12); }
+  .cobro-card .cobro-title{ font-weight:700; font-size:14.5px; }
+  .cobro-card .cobro-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .cobro-card .cobro-body{ padding:16px 20px; }
+
+  /* ---------- Tabla (escritorio) vs tarjetas tipo "cobro" (Android / tablet) ---------- */
+  .table-wrap-desktop{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .cards-wrap-mobile{ display:none; padding:14px; }
+  @media(max-width:900px){
+    .table-wrap-desktop{ display:none; }
+    .cards-wrap-mobile{ display:block; }
+  }
+  .cobro-info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:14px; }
+  .cobro-info-item .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:700; margin-bottom:3px; }
+  .cobro-info-item .val{ font-size:13.5px; font-weight:600; }
+  .cobro-monto-wrap{ display:flex; align-items:center; justify-content:space-between; background:var(--success-soft); border-radius:10px; padding:12px 16px; margin-top:6px; flex-wrap:wrap; gap:8px; }
+  .cobro-monto-wrap .lbl{ font-size:12px; font-weight:700; color:var(--success); text-transform:uppercase; letter-spacing:.03em; }
+  .cobro-monto-wrap .val{ font-size:22px; font-weight:800; color:var(--success); }
+
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  .toolbar select, .toolbar input{ padding:9px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; background:#fff; }
+  .filter-tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+  .filter-tab{ padding:7px 14px; border-radius:20px; font-size:12.5px; font-weight:600; background:var(--surface-2); color:var(--muted); cursor:pointer; border:1.5px solid transparent; }
+  .filter-tab.active{ background:var(--primary-soft); color:var(--primary-dark); border-color:var(--primary); }
+  .filter-tab.disabled{ opacity:.4; cursor:not-allowed; pointer-events:none; }
+
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--muted); }
+  .empty-state .ic{ font-size:40px; margin-bottom:10px; }
+
+  /* ---------- Resultado de jugadas: tarjeta comparativa ---------- */
+  .rj-oficial-card{ background:linear-gradient(135deg,var(--primary-dark),#3a0d5c); border-radius:var(--radius); padding:18px 20px; color:#fff; box-shadow:var(--shadow); }
+  .rj-oficial-card .lbl{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; opacity:.75; font-weight:700; margin-bottom:10px; }
+  .rj-oficial-numeros{ display:flex; gap:10px; flex-wrap:wrap; }
+  .rj-oficial-numero{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .rj-oficial-numero .num{ min-width:52px; text-align:center; background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.3); border-radius:12px; padding:8px 12px; font-family:'Consolas','Courier New',monospace; font-weight:800; font-size:18px; }
+  .rj-oficial-numero .pos{ font-size:10.5px; opacity:.75; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+
+  .rj-ticket-card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden; border:1px solid var(--border); }
+  .rj-ticket-head{ padding:14px 20px; background:var(--surface-2); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; border-bottom:1px solid var(--border); }
+  .rj-ticket-title{ font-weight:700; font-size:14.5px; }
+  .rj-ticket-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .rj-ticket-body{ padding:16px 20px; }
+  .rj-numeros-jugados{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .rj-chip{ display:flex; flex-direction:column; align-items:center; gap:3px; min-width:56px; }
+  .rj-chip .num{ min-width:52px; text-align:center; border-radius:12px; padding:8px 10px; font-family:'Consolas','Courier New',monospace; font-weight:800; font-size:16px; border:1.5px solid transparent; }
+  .rj-chip .tagpos{ font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:1px 7px; border-radius:10px; }
+  .rj-chip.acierto-1 .num{ background:var(--success-soft); color:var(--success); border-color:var(--success); }
+  .rj-chip.acierto-1 .tagpos{ background:var(--success); color:#fff; }
+  .rj-chip.acierto-2 .num{ background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+  .rj-chip.acierto-2 .tagpos{ background:var(--accent); color:#fff; }
+  .rj-chip.acierto-3 .num{ background:var(--terciario-soft); color:var(--terciario); border-color:var(--terciario); }
+  .rj-chip.acierto-3 .tagpos{ background:var(--terciario); color:#fff; }
+  .rj-chip.sin-acierto .num{ background:var(--danger-soft); color:var(--danger); border-color:var(--danger); }
+  .rj-chip.sin-acierto .tagpos{ background:var(--danger); color:#fff; }
+  .rj-resultado-global{ font-size:12px; font-weight:800; padding:4px 12px; border-radius:20px; white-space:nowrap; }
+  .rj-resultado-global.g1{ background:var(--success-soft); color:var(--success); }
+  .rj-resultado-global.g2{ background:var(--accent-soft); color:var(--accent); }
+  .rj-resultado-global.g3{ background:var(--terciario-soft); color:var(--terciario); }
+  .rj-resultado-global.g0{ background:var(--danger-soft); color:var(--danger); }
+  .rj-premio-line{ display:flex; align-items:center; justify-content:space-between; background:var(--success-soft); border-radius:10px; padding:10px 14px; margin-top:12px; font-weight:700; color:var(--success); }
+  @media(max-width:480px){
+    .rj-chip .num, .rj-oficial-numero .num{ min-width:44px; font-size:14px; padding:7px 8px; }
+    .cuenta-opcion{ flex-wrap:wrap; }
+    .cuenta-opcion .cuenta-info{ order:1; flex-basis:100%; }
+    .cuenta-opcion .cfg-altobajo-switch{ order:2; }
+    .cuenta-opcion .check{ order:3; }
+  }
+
+  /* Modal */
+  .modal-bg{ position:fixed; inset:0; background:rgba(30,10,45,.45); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
+  .modal-bg.show{ display:flex; }
+  .modal{ background:#fff; border-radius:16px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; box-shadow:0 30px 70px rgba(0,0,0,.3); }
+  .modal.modal-wide{ max-width:640px; }
+  .modal-head{ padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-head h3{ margin:0; font-size:16px; }
+  .modal-close{
+    cursor:pointer; color:var(--muted); font-size:20px; background:none; border:none; line-height:1;
+    width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; flex-shrink:0;
+  }
+  .modal-close:active{ background:var(--surface-2); }
+  .modal-body{ padding:20px 22px; }
+  .modal-foot{ padding:16px 22px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+
+  .toast-wrap{ position:fixed; bottom:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:10px; }
+  .toast{ background:#241f33; color:#fff; padding:13px 18px; border-radius:10px; font-size:13.5px; box-shadow:0 10px 30px rgba(0,0,0,.25); max-width:320px; animation:slidein .2s ease; }
+  .toast.success{ background:#1f9d55; }
+  .toast.danger{ background:#d1394a; }
+  @keyframes slidein{ from{ transform:translateX(30px); opacity:0; } to{ transform:translateX(0); opacity:1; } }
+
+  .action-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .hint{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+  /* ---- Nueva jugada: selección múltiple de jugadores ---- */
+  .nj-jugadores-toolbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .nj-jugadores-toolbar .small-muted{ margin-left:auto; }
+  .nj-jugadores-list{ display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; border:1.5px solid var(--surface-2); border-radius:12px; padding:8px; background:var(--surface-2); }
+  .nj-jugador-item{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; background:#fff; border:1.5px solid transparent; cursor:pointer; user-select:none; }
+  .nj-jugador-item:hover{ border-color:var(--primary); }
+  .nj-jugador-item.checked{ background:var(--primary-soft); border-color:var(--primary); }
+  .nj-jugador-item input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--primary); flex:none; }
+  .nj-jugador-item .nj-jugador-nombre{ font-weight:700; font-size:13.5px; }
+  .nj-jugador-item .nj-jugador-user{ font-size:12px; color:var(--muted); }
+  .nj-jugadores-vacio{ padding:10px 4px; font-size:13px; color:var(--muted); }
+
+  /* ---- Nueva jugada: monto por jugador (martingala individual) ---- */
+  .nj-montos-list{ display:flex; flex-direction:column; gap:10px; }
+  .nj-monto-row{ border:1.5px solid var(--surface-2); border-radius:12px; padding:10px 12px; background:var(--surface-2); }
+  .nj-monto-row-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .nj-monto-row-head .nombre{ font-weight:700; font-size:13.5px; }
+  .nj-monto-row-head .badge-modo{ font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:2px 8px; border-radius:10px; }
+  .nj-monto-row-head .badge-modo.auto{ background:var(--danger-soft); color:var(--danger); }
+  .nj-monto-row-head .badge-modo.manual{ background:var(--success-soft); color:var(--success); }
+  .nj-monto-row .nj-monto-input{ width:100%; }
+  .nj-monto-row .nj-monto-hint{ font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.4; }
+  .nj-monto-row.calculando{ opacity:.6; }
+  .nj-monto-numeros{ font-size:12px; color:var(--text); margin-bottom:6px; line-height:1.5; }
+  .nj-monto-numeros .mono{ font-family:inherit; }
+  .nj-monto-aviso-saldo{ font-size:11.5px; font-weight:700; color:var(--danger); background:var(--danger-soft); border-radius:8px; padding:6px 9px; margin-top:7px; line-height:1.4; }
+
+  /* ---- Nueva jugada: botón "Generar numerólogo" (tendencia alto/bajo) ---- */
+  .nj-numerologo-botones{ display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+  .nj-generado-box{ margin-top:8px; line-height:1.5; }
+  .divider{ height:1px; background:var(--border); margin:16px 0; }
+  .avail-numbers{ background:var(--surface-2); border-radius:10px; padding:14px; }
+
+  /* ---- Numerólogo: cuadrito de resultado generado, bonito y profesional ---- */
+  .numerologo-card{
+    background:linear-gradient(165deg, var(--primary-soft) 0%, var(--surface) 55%);
+    border:1.5px solid var(--primary);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:var(--shadow);
+  }
+  .numerologo-card-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
+  .numerologo-card-loteria{ font-weight:800; font-size:16px; color:var(--text); letter-spacing:.01em; }
+  .numerologo-card-tipo{ font-size:12.5px; font-weight:700; color:var(--primary-dark); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
+  .numerologo-card-count{ font-size:11.5px; font-weight:700; color:var(--primary-dark); background:#fff; border:1px solid var(--primary); padding:3px 12px; border-radius:20px; white-space:nowrap; }
+  .numerologo-card-numeros{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .numerologo-card-numeros .numchip{
+    background:linear-gradient(180deg,#fff 0%, var(--primary-soft) 100%);
+    border:1.5px solid var(--primary);
+    color:var(--primary-dark);
+    font-weight:800;
+    font-size:15px;
+    min-width:44px;
+    height:44px;
+    box-shadow:0 2px 5px rgba(0,0,0,.06);
+  }
+  .numerologo-card-meta{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .numerologo-meta-chip{ font-size:11px; font-weight:700; color:var(--muted); background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:3px 10px; }
+  .numerologo-copiar{ width:100%; }
+  .small-muted{ font-size:12px; color:var(--muted); }
+  .hist-recarga-item{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .hist-recarga-item:last-child{ border-bottom:none; }
+  .hist-recarga-monto{ font-weight:700; color:var(--success); white-space:nowrap; }
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:#d7cbe8; border-radius:8px; }
+
+  /* ======================================================================
+     RESPONSIVO: PC / TABLET / ANDROID (teléfono)
+     - Escritorio y tablet en horizontal (>900px): sidebar fija, como hoy.
+     - Tablet en vertical y teléfonos (<=900px): la sidebar se convierte en
+       un panel deslizable ("drawer") que se abre con el botón ☰ del topbar.
+     - Teléfonos (<=640px): además, los modales se muestran como una hoja
+       inferior ("bottom sheet"), igual que en una app nativa de Android.
+     ====================================================================== */
+  .hamburger{
+    display:none; background:none; border:none; cursor:pointer;
+    width:40px; height:40px; border-radius:9px; color:var(--text); font-size:20px;
+    align-items:center; justify-content:center; flex-shrink:0; margin-right:6px;
+  }
+  .hamburger:hover{ background:var(--surface-2); }
+  .hamburger:active{ background:var(--surface-2); transform:scale(.94); }
+  .sidebar-overlay{ display:none; position:fixed; inset:0; background:rgba(20,6,32,.5); z-index:15; }
+  .sidebar-overlay.show{ display:block; }
+
+  @media(max-width:900px){
+    .hamburger{ display:inline-flex; }
+    .sidebar{
+      width:270px; max-width:82vw; transform:translateX(-100%); transition:transform .25s ease; z-index:20;
+      box-shadow:0 0 0 rgba(0,0,0,0);
+    }
+    .sidebar.open{ transform:translateX(0); box-shadow:10px 0 40px rgba(0,0,0,.35); }
+    .main{ margin-left:0; }
+    .topbar{ padding:12px 14px; padding-top:calc(12px + env(safe-area-inset-top)); gap:8px; }
+    .topbar h1{ font-size:15.5px; }
+    .topbar-right{ gap:8px; }
+    .user-chip > div:last-child{ display:none; }
+    .saldo-pill{ font-size:12.5px; padding:6px 11px; }
+    .caja-pill{ font-size:11px; padding:5px 9px; }
+    .content{ padding:16px 14px 50px; padding-bottom:calc(50px + env(safe-area-inset-bottom)); }
+    /* Objetivos táctiles más grandes, cómodos con el dedo */
+    .navitem{ padding:13px 12px; font-size:14.5px; }
+    .btn{ min-height:44px; }
+    .btn-sm{ min-height:36px; }
+    .field input, .field select, .field textarea,
+    .toolbar select, .toolbar input{ min-height:44px; font-size:15px; }
+    input[type="date"], input[type="number"], input[type="text"], select{ min-height:44px; }
+  }
+
+  @media(max-width:640px){
+    .grid-4, .grid-3, .grid-2{ grid-template-columns:1fr; }
+    .cobro-info-grid{ grid-template-columns:repeat(2,1fr); }
+    .stat-card{ padding:15px 16px; }
+    .stat-card .val{ font-size:21px; }
+    .card-head{ padding:14px 16px; }
+    .card-body{ padding:15px; }
+    .action-row{ width:100%; }
+    .action-row .btn{ flex:1; }
+    .cuenta-card, .cobro-card .cobro-head{ flex-wrap:wrap; }
+    .cuenta-card .action-row{ width:100%; justify-content:flex-start; }
+    table{ min-width:560px; }
+    .nc-list{ max-height:none; }
+
+    /* Modales como "bottom sheet": entran desde abajo, igual que una app nativa */
+    .modal-bg{ align-items:flex-end; padding:0; }
+    .modal, .modal.modal-wide{
+      max-width:100%; width:100%; max-height:88vh; border-radius:20px 20px 0 0;
+      animation: sheetUp .22s ease-out;
+    }
+    .modal-head{ padding:16px 18px 14px; position:relative; }
+    .modal-head::before{
+      content:""; position:absolute; top:8px; left:50%; transform:translateX(-50%);
+      width:38px; height:4px; border-radius:4px; background:var(--border);
+    }
+    .modal-body{ padding:16px 18px; }
+    .modal-foot{
+      flex-direction:column-reverse; padding:14px 18px;
+      padding-bottom:calc(14px + env(safe-area-inset-bottom));
+    }
+    .modal-foot .btn{ width:100%; }
+  }
+  @keyframes sheetUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+
+  @media(max-width:420px){
+    .login-card{ padding:28px 20px; }
+    .topbar h1{ font-size:14px; }
+    .saldo-pill span, .caja-pill{ font-size:11px; }
+  }
+
+  .filter-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6680' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px !important;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .filter-select:hover {
+    border-color: var(--primary);
+  }
+  .filter-select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(106,27,154,.1);
+  }
+
+/* ======================================================================
+   MATERIAL SYMBOLS (iconos estilo Android) — ligaduras vía Google Fonts,
+   cargadas desde <head>. Aquí solo se fija su tamaño/alineación base.
+   ====================================================================== */
+.material-symbols-rounded{
+  font-family:'Material Symbols Rounded';
+  font-weight:normal; font-style:normal;
+  display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr;
+  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga';
+  -webkit-font-smoothing:antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 22px; line-height:1; vertical-align:middle; user-select:none;
+}
+
+/* ======================================================================
+   RIPPLE — el "toque" característico de Material Design. Se activa desde
+   JS (ver js/nav.js -> attachRipple) sobre botones, navitems y tarjetas
+   pulsables. Puramente visual, no cambia el comportamiento de los clics.
+   ====================================================================== */
+.ripple-host{ position:relative; overflow:hidden; }
+.ripple-circle{
+  position:absolute; border-radius:50%; transform:scale(0);
+  background:currentColor; opacity:.28; pointer-events:none;
+  animation: ripple-anim .55s ease-out;
+}
+@keyframes ripple-anim{ to{ transform:scale(2.6); opacity:0; } }
+
+/* ======================================================================
+   BOTTOM NAVIGATION BAR (Android) — solo en pantallas <=900px. Muestra
+   los 4-5 destinos más usados de cada rol; el resto vive en el drawer,
+   al que se llega tocando "Más".
+   ====================================================================== */
+.bottom-nav{
+  display:none;
+  position:fixed; left:0; right:0; bottom:0; z-index:18;
+  background:var(--surface); box-shadow:0 -1px 3px rgba(30,10,45,.12), 0 -1px 8px rgba(30,10,45,.08);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.bottom-nav-items{ display:flex; align-items:stretch; height:64px; }
+.bottom-nav-item{
+  position:relative; overflow:hidden;
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  color:var(--muted); font-size:11px; font-weight:600; cursor:pointer; background:none; border:none;
+}
+.bottom-nav-item .navicon{
+  font-size:22px; width:34px; height:26px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  transition: background .15s, color .15s;
+}
+.bottom-nav-item.active{ color:var(--primary-dark); }
+.bottom-nav-item.active .navicon{ background:var(--primary-soft); color:var(--primary); }
+.bottom-nav-item .badge-dot{
+  position:absolute; top:8px; right:calc(50% - 20px); width:8px; height:8px; border-radius:50%;
+  background:var(--danger); display:none;
+}
+.bottom-nav-item .badge-dot.show{ display:block; }
+
+@media(max-width:900px){
+  .bottom-nav{ display:block; }
+  .content{ padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+}
+
+/* ======================================================================
+   FAB — Floating Action Button, la acción principal de la pantalla
+   actual (p.ej. "Nueva jugada"). Solo aparece en las vistas donde tiene
+   sentido; ver data-fab-view en el HTML y js/nav.js.
+   ====================================================================== */
+.fab{
+  position:fixed; right:22px; bottom:22px; z-index:19;
+  width:58px; height:58px; border-radius:18px; border:none;
+  background:var(--primary); color:#fff; box-shadow:var(--elevation-3);
+  display:none; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .1s;
+}
+.fab:active{ transform:scale(.94); }
+.fab.show{ display:flex; }
+.fab .material-symbols-rounded{ font-size:26px; }
+@media(max-width:900px){
+  .fab{ right:16px; bottom:calc(80px + env(safe-area-inset-bottom)); }
+}
+@media(min-width:901px){
+  .fab{ display:none !important; } /* en escritorio ya está el botón normal de "Nueva jugada" en cada vista */
+}
+
+/* ======================================================================
+   Pequeños ajustes Android adicionales
+   ====================================================================== */
+.login-logo{ box-shadow:var(--elevation-2); }
+.stat-card, .card{ box-shadow:var(--shadow); }
+.modal{ box-shadow:var(--elevation-3); }
+.toast{ border-radius:28px; box-shadow:var(--elevation-2); }
+
+/* ======================================================================
+   CHAT — chat grupal admin + jugadores (texto y notas de voz).
+   ====================================================================== */
+.chat-card{ display:flex; flex-direction:column; padding:0; overflow:hidden; }
+.chat-mensajes{
+  display:flex; flex-direction:column; gap:2px;
+  height:calc(100vh - 360px); min-height:320px; max-height:560px;
+  overflow-y:auto; padding:16px 16px 4px;
+}
+@media(max-width:900px){
+  .chat-mensajes{ height:calc(100vh - 420px); min-height:260px; }
+}
+.chat-bubble-row{ display:flex; margin-bottom:10px; }
+.chat-bubble-row.mio{ justify-content:flex-end; }
+.chat-bubble{
+  max-width:78%; background:var(--surface-2); border:1.5px solid var(--border);
+  border-radius:16px 16px 16px 4px; padding:9px 13px 6px;
+}
+.chat-bubble-row.mio .chat-bubble{
+  background:var(--primary-soft); border-color:#e2d4f5;
+  border-radius:16px 16px 4px 16px;
+}
+.chat-autor{ display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap; }
+.chat-autor-nombre{ font-weight:700; font-size:12.5px; color:var(--primary-dark); }
+.chat-rol-tag{ font-size:10px; font-weight:700; padding:1px 8px; border-radius:20px; }
+.chat-rol-tag.rol-admin{ background:var(--accent-soft); color:var(--accent); }
+.chat-rol-tag.rol-vendedor{ background:var(--terciario-soft); color:var(--terciario); }
+.chat-rol-tag.rol-alerta{ background:var(--danger-soft); color:var(--danger); }
+.chat-bubble-row.alerta .chat-bubble{
+  background:var(--danger-soft); border-color:var(--danger); border-width:1.5px;
+}
+.chat-bubble-row.alerta .chat-autor-nombre{ color:var(--danger); }
+.chat-texto{ font-size:14px; color:var(--text); white-space:pre-wrap; word-break:break-word; line-height:1.4; }
+.chat-hora{ font-size:10px; color:var(--muted); text-align:right; margin-top:3px; }
+
+.chat-input-row{
+  display:flex; align-items:center; gap:8px; padding:12px 14px;
+  border-top:1.5px solid var(--border); background:var(--surface);
+}
+.chat-input-row input[type="text"]{
+  flex:1; border:1.5px solid var(--border); border-radius:24px; padding:10px 16px;
+  font-size:14px; background:var(--surface-2); outline:none;
+}
+.chat-input-row input[type="text"]:focus{ border-color:var(--primary); background:#fff; }
+.chat-send-btn{
+  width:40px; height:40px; border-radius:50%; border:none; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  background:var(--primary); color:#fff;
+}
+.chat-send-btn .material-symbols-rounded{ font-size:20px; }
